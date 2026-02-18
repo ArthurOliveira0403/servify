@@ -2,7 +2,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   SERVICE_EXECUTION_REPOSITORY,
@@ -22,6 +22,11 @@ import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
+import { Feature } from 'src/domain/entities/subscription';
+import {
+  type ISubscriptionPolicyService,
+  SUBSCRIPTION_POLICY_SERVICE,
+} from '../services/isubcription-policy.service';
 
 @Injectable()
 export class CreateServiceExecutionUseCase {
@@ -34,11 +39,18 @@ export class CreateServiceExecutionUseCase {
     private clientCompanyRepository: ClientCompanyRepository,
     @Inject(DATE_TRANSFORM_SERVICE)
     private dateTransformService: DateTransformService,
+    @Inject(SUBSCRIPTION_POLICY_SERVICE)
+    private subscriptionPolicyService: ISubscriptionPolicyService,
   ) {}
 
   async handle(
     data: CreateServiceExecutionDTO,
   ): Promise<{ serviceExecutionId: string }> {
+    await this.subscriptionPolicyService.handle(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
+
     const service = await this.serviceRepository.findById(data.serviceId);
     if (!service) throw new NotFoundException('Service not found');
 
@@ -51,7 +63,7 @@ export class CreateServiceExecutionUseCase {
       service.companyId !== clientCompany.companyId ||
       service.companyId !== data.companyId
     )
-      throw new BadRequestException(
+      throw new ForbiddenException(
         'Service and client company do not belong to the same company',
       );
 

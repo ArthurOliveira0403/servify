@@ -81,9 +81,9 @@ describe('ListClientsCompanyUseCase', () => {
 
     spies = {
       clientCompanyRepository: {
-        findManyByCompanyId: jest.spyOn(
+        findManyByCompany: jest.spyOn(
           clientCompanyRepository,
-          'findManyByCompanyId',
+          'findManyByCompany',
         ),
         findBydId: jest.spyOn(clientCompanyRepository, 'findById'),
       },
@@ -112,7 +112,7 @@ describe('ListClientsCompanyUseCase', () => {
     const response = await useCase.all(dataAll);
 
     expect(
-      spies.clientCompanyRepository.findManyByCompanyId,
+      spies.clientCompanyRepository.findManyByCompany,
     ).toHaveBeenCalledWith(dataAll.companyId);
     expect(spies.clientRepository.findById).toHaveBeenCalled();
     expect(response).toEqual(returnUseCase);
@@ -129,7 +129,7 @@ describe('ListClientsCompanyUseCase', () => {
     await expect(useCase.all(dataAll)).rejects.toThrow(NotFoundException);
 
     expect(
-      spies.clientCompanyRepository.findManyByCompanyId,
+      spies.clientCompanyRepository.findManyByCompany,
     ).toHaveBeenCalledWith(dataAll.companyId);
     expect(spies.clientRepository.findById).toHaveBeenCalled();
   });
@@ -138,7 +138,7 @@ describe('ListClientsCompanyUseCase', () => {
     const response = await useCase.all(dataAll);
 
     expect(
-      spies.clientCompanyRepository.findManyByCompanyId,
+      spies.clientCompanyRepository.findManyByCompany,
     ).toHaveBeenCalledWith(dataAll.companyId);
     expect(response).toEqual([]);
   });

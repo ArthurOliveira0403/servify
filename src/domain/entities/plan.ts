@@ -7,7 +7,10 @@ abstract class PlanProps {
   name: string;
   type: PlanType;
   price: number;
-  description: string;
+  servicesLimit: number;
+  serviceExecutionsLimit: number;
+  clientCompanysLimit: number;
+  invoicesLimit: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -16,7 +19,10 @@ abstract class UpdateProps {
   name?: string;
   type?: PlanType;
   price?: number;
-  description?: string;
+  servicesLimit?: number;
+  serviceExecutionsLimit?: number;
+  clientCompanysLimit?: number;
+  invoiceLimit?: number;
   updatedAt: Date;
 }
 
@@ -25,7 +31,10 @@ export class Plan {
   private _name: string;
   private _type: PlanType;
   private _price: number;
-  private _description: string;
+  private _servicesLimit: number;
+  private _serviceExecutionsLimit: number;
+  private _clientCompanysLimit: number;
+  private _invoicesLimit: number;
   private _createdAt: Date;
   private _updatedAt: Date;
 
@@ -34,7 +43,10 @@ export class Plan {
     this._name = props.name;
     this._type = props.type;
     this._price = props.price;
-    this._description = props.description;
+    this._servicesLimit = props.servicesLimit;
+    this._serviceExecutionsLimit = props.serviceExecutionsLimit;
+    this._clientCompanysLimit = props.clientCompanysLimit;
+    this._invoicesLimit = props.invoicesLimit;
     this._createdAt = props.createdAt ?? new Date();
     this._updatedAt = props.updatedAt ?? new Date();
   }
@@ -43,7 +55,12 @@ export class Plan {
     this._name = props.name ?? this.name;
     this._type = props.type ?? this.type;
     this._price = props.price ?? this.price;
-    this._description = props.description ?? this.description;
+    this._servicesLimit = props.servicesLimit ?? this.servicesLimit;
+    this._serviceExecutionsLimit =
+      props.serviceExecutionsLimit ?? this.serviceExecutionsLimit;
+    this._clientCompanysLimit =
+      props.clientCompanysLimit ?? this.clientCompanysLimit;
+    this._invoicesLimit = props.invoiceLimit ?? this.invoicesLimit;
     this._updatedAt = props.updatedAt;
   }
 
@@ -59,8 +76,17 @@ export class Plan {
   get price() {
     return this._price;
   }
-  get description() {
-    return this._description;
+  get servicesLimit() {
+    return this._servicesLimit;
+  }
+  get serviceExecutionsLimit() {
+    return this._serviceExecutionsLimit;
+  }
+  get clientCompanysLimit() {
+    return this._clientCompanysLimit;
+  }
+  get invoicesLimit() {
+    return this._invoicesLimit;
   }
   get createdAt() {
     return this._createdAt;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PriceConverter } from 'src/application/common/price-converter.common';
 import { UpdateServiceDTO } from 'src/application/dtos/update-service.dto';
 import { DateTransformService } from 'src/application/services/date-transform.service';
@@ -17,15 +17,18 @@ describe('UpdateServiceUseCase', () => {
   let spies: any;
 
   const serviceId = '1';
+  const companyId = '2';
+
   const serviceMock = new Service({
     id: serviceId,
     name: 'Service',
-    companyId: '2',
+    companyId,
     description: 'A service',
     basePrice: 99.99,
   });
 
   const data: UpdateServiceDTO = {
+    companyId,
     serviceId,
     description: 'A description',
     basePrice: 129.99,
@@ -92,5 +95,17 @@ describe('UpdateServiceUseCase', () => {
     ).rejects.toThrow(NotFoundException);
 
     expect(spies.serviceRepository.findById).toHaveBeenCalledWith(fakeId);
+  });
+
+  it('should throw a ForbiddenException when service belong not the company', async () => {
+    await repository.save(serviceMock);
+
+    const fakeCompanyId = '123456';
+
+    await expect(
+      useCase.handle({ ...data, companyId: fakeCompanyId }),
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(spies.serviceRepository.findById).toHaveBeenCalledWith(serviceId);
   });
 });

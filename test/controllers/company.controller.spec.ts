@@ -4,10 +4,10 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DATE_TRANSFORM_SERVICE } from 'src/application/services/date-transform.service';
 import { UpdateCompanyUseCase } from 'src/application/use-cases/update-company.use-case';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 import { Address } from 'src/domain/entities/address';
 import { Company } from 'src/domain/entities/company';
 import { CompanyController } from 'src/infra/http/controllers/company.controller';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
 import { UpdateCompanyBodyDTO } from 'src/infra/schemas/update-company.schemas';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
 
@@ -39,9 +39,8 @@ describe('companyController', () => {
     },
   };
 
-  const user: ReturnCompanyUser = {
+  const user: AuthUser = {
     id: companyMock.id,
-    cnpj: companyMock.cnpj,
     email: companyMock.email,
     role: companyMock.role,
   };

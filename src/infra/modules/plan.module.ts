@@ -3,7 +3,7 @@ import { PlanController } from '../http/controllers/plan.controller';
 import { DatabaseModule } from 'src/infra/modules/database.module';
 import { CreatePlanUseCase } from '../../application/use-cases/create-plan.use-case';
 import { PLAN_REPOSITORY } from '../../domain/repositories/plan.repository';
-import { PrismaPlanRepository } from '../../infra/prisma/repositories/prisma-plan.repository';
+import { PrismaPlanRepository } from '../services/prisma/repositories/prisma-plan.repository';
 
 import { UpdatePlanUseCase } from '../../application/use-cases/update-plan.use-case';
 import { DateTrasnformModule } from './date-transform.module';

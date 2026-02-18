@@ -4,5 +4,8 @@ export abstract class CreatePlanDTO {
   name: string;
   type: PlanType;
   price: number;
-  description: string;
+  servicesLimit: number;
+  serviceExecutionsLimit: number;
+  clientCompanysLimit: number;
+  invoicesLimit: number;
 }

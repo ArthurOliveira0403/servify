@@ -1,9 +1,7 @@
 import z from 'zod';
 
-export const createSubscriptionBodySchema = z.object({
-  planId: z.string(),
-});
+export const createSubscriptionParamSchema = z.string();
 
-export type CreateSubscriptionBodyDTO = z.infer<
-  typeof createSubscriptionBodySchema
+export type CreateSubscriptionParamDTO = z.infer<
+  typeof createSubscriptionParamSchema
 >;

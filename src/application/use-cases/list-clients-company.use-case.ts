@@ -31,8 +31,9 @@ export class ListClientsCompanyUseCase {
   async all(
     data: ListAllClientsCompanyDTO,
   ): Promise<ClientCompanyWithClientDTO[]> {
-    const clientsCompany =
-      await this.clientCompanyRepository.findManyByCompanyId(data.companyId);
+    const clientsCompany = await this.clientCompanyRepository.findManyByCompany(
+      data.companyId,
+    );
 
     if (clientsCompany.length === 0) return [];
 

@@ -9,6 +9,6 @@ export interface ClientCompanyRepository {
     companyId: string,
     clientId: string,
   ): Promise<ClientCompany | null>;
-  findManyByCompanyId(companyId: string): Promise<ClientCompany[] | []>;
+  findManyByCompany(companyId: string): Promise<ClientCompany[] | []>;
   update(clientCompany: ClientCompany): Promise<void>;
 }

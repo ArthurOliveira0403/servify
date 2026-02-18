@@ -1,9 +1,9 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
-import { CurrentCompanyUser } from 'src/infra/decorators/current-company-user.decorator';
-import { Zod } from 'src/infra/decorators/zod-decorator';
-import { JwtAuthCompanyGuard } from 'src/infra/jwt/guards/jwt-auth-company.guard';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
+import { Zod } from 'src/infra/decorators/zod.decorator';
+import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
 import {
   type CreateServiceExecutionBodyDTO,
   createServiceExecutionBodySchema,
@@ -16,9 +16,9 @@ export class ServiceExecutionController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async create(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Body(Zod(createServiceExecutionBodySchema))
     data: CreateServiceExecutionBodyDTO,
   ) {

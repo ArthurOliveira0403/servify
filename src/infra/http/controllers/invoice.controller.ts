@@ -9,9 +9,6 @@ import {
 } from '@nestjs/common';
 import { GenerateInvoicePdfUseCase } from 'src/application/use-cases/generate-invoice-pdf.use-case';
 import { IssueInvoiceUseCase } from 'src/application/use-cases/issue-invoice.use-case';
-import { CurrentCompanyUser } from 'src/infra/decorators/current-company-user.decorator';
-import { Zod } from 'src/infra/decorators/zod-decorator';
-import { JwtAuthCompanyGuard } from 'src/infra/jwt/guards/jwt-auth-company.guard';
 import {
   type GenerateInvoicePdfParamDTO,
   generateInvoicePdfParamSchema,
@@ -21,9 +18,14 @@ import {
   issueInvoiceParamSchema,
 } from 'src/infra/schemas/issue-invoice.schemas';
 import type { FastifyReply } from 'fastify';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
 import { Timezone } from 'src/infra/decorators/timezone.decorator';
+import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { Zod } from 'src/infra/decorators/zod.decorator';
+import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
+import { Roles } from 'src/infra/decorators/roles.decorator';
 
+@Roles('COMPANY')
 @Controller('invoice')
 export class InvoiceController {
   constructor(
@@ -32,11 +34,11 @@ export class InvoiceController {
   ) {}
 
   @Post(':id/issue')
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async issueInvoice(
     @Param('id', Zod(issueInvoiceParamSchema))
     id: IssueInvoiceParamDTO,
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Timezone() timezone: string,
   ) {
     if (!timezone) throw new BadRequestException('Timezone not informed');
@@ -54,15 +56,14 @@ export class InvoiceController {
   }
 
   @Get(':id/pdf')
-  @UseGuards(JwtAuthCompanyGuard)
   async generatePdf(
     @Param('id', Zod(generateInvoicePdfParamSchema))
     id: GenerateInvoicePdfParamDTO,
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Res() res: FastifyReply,
   ) {
     const pdf = await this.generateInvoicePdfUseCase.handle({
-      companyCnpj: user.cnpj,
+      companyId: user.id,
       invoiceId: id,
     });
 

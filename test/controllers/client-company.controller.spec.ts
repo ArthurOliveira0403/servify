@@ -10,13 +10,15 @@ import { CreateClientCompanyUseCase } from 'src/application/use-cases/create-cli
 import { UpdateClientCompanyUseCase } from 'src/application/use-cases/update-client-company.use-case';
 import { ClientCompany } from 'src/domain/entities/client-company';
 import { ClientCompanyController } from 'src/infra/http/controllers/client-company.controller';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
 import { ClientCompanyResponseMapper } from 'src/infra/http/mappers/client-company-response.mapper';
 import { CreateClientCompanyBodyDTO } from 'src/infra/schemas/create-client-company.schemas';
 import { UpdateClientCompanyBodyDTO } from 'src/infra/schemas/update-client-company.schemas';
 import { Client } from 'src/domain/entities/client';
 import { ListClientsCompanyUseCase } from 'src/application/use-cases/list-clients-company.use-case';
 import { ClientCompanyWithClientDTO } from 'src/application/dtos/shared/client-company-with-client.dto';
+import { SubscriptionModule } from 'src/infra/modules/subscription.module';
+import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 
 const createClientCompanyUseCaseMock = {
   provide: CreateClientCompanyUseCase,
@@ -86,9 +88,8 @@ describe('ClientCompanyController', () => {
   let controller: ClientCompanyController;
   let spies: any;
 
-  const user: ReturnCompanyUser = {
+  const user: AuthUser = {
     id: 'user-id-123',
-    cnpj: '1234567',
     email: 'company@email.com',
     role: 'COMPANY',
   };
@@ -127,6 +128,7 @@ describe('ClientCompanyController', () => {
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [SubscriptionModule, DateTrasnformModule],
       controllers: [ClientCompanyController],
       providers: [
         createClientCompanyUseCaseMock,

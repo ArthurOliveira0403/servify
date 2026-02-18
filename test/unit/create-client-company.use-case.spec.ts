@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ConflictException } from '@nestjs/common';
 import { CreateClientCompanyDTO } from 'src/application/dtos/create-client-company.dto';
-import { DateTransformService } from 'src/application/services/date-transform.service';
 import { CreateClientCompanyUseCase } from 'src/application/use-cases/create-client-company.use-case';
 import { Client } from 'src/domain/entities/client';
 import { ClientCompany } from 'src/domain/entities/client-company';
+import { Feature } from 'src/domain/entities/subscription';
+import { ClientCompanyRepository } from 'src/domain/repositories/client-company.repository';
+import { ClientRepository } from 'src/domain/repositories/client.repository';
 import { InMemoryClientCompanyRepository } from 'test/utils/in-memory/in-memory.client-company.repository';
 import { InMemoryClientRepository } from 'test/utils/in-memory/in-memory.client-repository';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('CreateClientCompanyUseCase', () => {
   let useCase: CreateClientCompanyUseCase;
-  let clientCompanyRepository: InMemoryClientCompanyRepository;
-  let clientRepository: InMemoryClientRepository;
-  let dateTransformService: DateTransformService;
+  let clientCompanyRepository: ClientCompanyRepository;
+  let clientRepository: ClientRepository;
   let spies: any;
 
   const data: CreateClientCompanyDTO = {
@@ -27,14 +29,19 @@ describe('CreateClientCompanyUseCase', () => {
   beforeEach(() => {
     clientCompanyRepository = new InMemoryClientCompanyRepository();
     clientRepository = new InMemoryClientRepository();
-    dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformMock;
+    const subscriptionPolicyService = SubscriptionPolicyServiceMock;
     useCase = new CreateClientCompanyUseCase(
       clientRepository,
       clientCompanyRepository,
       dateTransformService,
+      subscriptionPolicyService,
     );
 
     spies = {
+      subscriptionPolicyService: {
+        handle: jest.spyOn(subscriptionPolicyService, 'handle'),
+      },
       clientRepository: {
         findByInternationalId: jest.spyOn(
           clientRepository,
@@ -54,6 +61,11 @@ describe('CreateClientCompanyUseCase', () => {
 
   it('should create a new client-company relationship when the Client does not exists', async () => {
     const response = await useCase.handle(data);
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.CLIENT_COMPANY,
+    );
 
     expect(spies.clientRepository.findByInternationalId).toHaveBeenCalledWith(
       data.internationalId,
@@ -77,7 +89,7 @@ describe('CreateClientCompanyUseCase', () => {
     expect(spies.clientCompanyRepository.save).toHaveBeenCalled();
 
     const clientCompanyId = (
-      await clientCompanyRepository.findManyByCompanyId(data.companyId)
+      await clientCompanyRepository.findManyByCompany(data.companyId)
     )[0].id;
 
     expect(response.clientCompanyId).toBe(clientCompanyId);
@@ -98,6 +110,11 @@ describe('CreateClientCompanyUseCase', () => {
       email: data.email,
       phone: data.phone,
     });
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.CLIENT_COMPANY,
+    );
 
     expect(spies.clientRepository.findByInternationalId).toHaveBeenCalledWith(
       clientMock.internationalId,
@@ -140,6 +157,11 @@ describe('CreateClientCompanyUseCase', () => {
     await expect(
       useCase.handle({ ...data, internationalId: clientMock.internationalId }),
     ).rejects.toThrow(ConflictException);
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.CLIENT_COMPANY,
+    );
 
     expect(spies.clientRepository.findByInternationalId).toHaveBeenCalledWith(
       clientMock.internationalId,

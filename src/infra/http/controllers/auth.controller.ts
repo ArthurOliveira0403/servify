@@ -5,12 +5,14 @@ import {
   signUpBodySchema,
   type SignUpBodyDTO,
 } from 'src/infra/schemas/sign-up.schemas';
-import { Zod } from 'src/infra/decorators/zod-decorator';
+import { Zod } from 'src/infra/decorators/zod.decorator';
 import {
   signInBodySchema,
   type SignInBodyDTO,
 } from 'src/infra/schemas/sign-in.schemas';
+import { Public } from 'src/infra/decorators/public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(

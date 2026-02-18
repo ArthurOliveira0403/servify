@@ -3,8 +3,10 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 import { ServiceExecutionController } from 'src/infra/http/controllers/service-execution.controller';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
+import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
+import { SubscriptionModule } from 'src/infra/modules/subscription.module';
 
 const createServiceExecutionUseCaseMock = {
   provide: CreateServiceExecutionUseCase,
@@ -17,9 +19,8 @@ describe('ServiceExecutionController', () => {
   let serviceExecutionController: ServiceExecutionController;
   let spies: any;
 
-  const user: ReturnCompanyUser = {
+  const user: AuthUser = {
     id: '1',
-    cnpj: '123456788',
     email: 'email@email.com',
     role: 'COMPANY',
   };
@@ -34,6 +35,7 @@ describe('ServiceExecutionController', () => {
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [SubscriptionModule, DateTrasnformModule],
       controllers: [ServiceExecutionController],
       providers: [createServiceExecutionUseCaseMock],
     }).compile();

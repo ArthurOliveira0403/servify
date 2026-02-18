@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { randomUUID } from 'node:crypto';
 import { AuthModule } from 'src/infra/modules/auth.module';
 import { SignUpBodyDTO } from 'src/infra/schemas/sign-up.schemas';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 
 describe('Auth (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: NestFastifyApplication;
 
   const data: SignUpBodyDTO = {
     name: 'Luminnus',
@@ -22,8 +24,11 @@ describe('Auth (e2e)', () => {
       imports: [AuthModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterAll(async () => {

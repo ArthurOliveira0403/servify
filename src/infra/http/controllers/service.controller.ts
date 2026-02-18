@@ -13,12 +13,11 @@ import { CreateServiceUseCase } from 'src/application/use-cases/create-service.u
 import { DeleteServiceUseCase } from 'src/application/use-cases/delete-service.use-case';
 import { ListServicesUseCase } from 'src/application/use-cases/list-services.use-case';
 import { UpdateServiceUseCase } from 'src/application/use-cases/update-service.use-case';
-import { JwtAuthCompanyGuard } from 'src/infra/jwt/guards/jwt-auth-company.guard';
 import {
   type CreateServiceBodyDTO,
   createServiceBodySchema,
 } from 'src/infra/schemas/create-service.schemas';
-import { Zod } from 'src/infra/decorators/zod-decorator';
+import { Zod } from 'src/infra/decorators/zod.decorator';
 import {
   type UpdateServiceBodyDTO,
   type UpdateServiceParamDTO,
@@ -29,8 +28,9 @@ import {
   type DeleteServiceParamDTO,
   deleteServiceParamSchema,
 } from 'src/infra/schemas/delete-service.schemas';
-import { CurrentCompanyUser } from 'src/infra/decorators/current-company-user.decorator';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
+import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
+import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 
 @Controller('service')
 export class ServiceController {
@@ -42,9 +42,9 @@ export class ServiceController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async create(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Body(Zod(createServiceBodySchema)) data: CreateServiceBodyDTO,
   ) {
     const { serviceId } = await this.createServiceUseCase.handle({
@@ -58,8 +58,8 @@ export class ServiceController {
   }
 
   @Get()
-  @UseGuards(JwtAuthCompanyGuard)
-  async listAll(@CurrentCompanyUser() user: ReturnCompanyUser) {
+  @UseGuards(SubscriptionGuard)
+  async listAll(@CurrentUser() user: AuthUser) {
     const services = await this.listServicesUseCase.handle({
       companyId: user.id,
     });
@@ -68,8 +68,9 @@ export class ServiceController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async update(
+    @CurrentUser() user: AuthUser,
     @Param('id', Zod(updateServiceParamSchema))
     serviceId: UpdateServiceParamDTO,
     @Body(Zod(updateServiceBodySchema)) data: UpdateServiceBodyDTO,
@@ -77,6 +78,7 @@ export class ServiceController {
     const { service } = await this.updateServiceUseCase.handle({
       ...data,
       serviceId,
+      companyId: user.id,
     });
     return {
       message: 'Successfully service updated',
@@ -85,11 +87,15 @@ export class ServiceController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async delete(
+    @CurrentUser() user: AuthUser,
     @Param('id', Zod(deleteServiceParamSchema)) id: DeleteServiceParamDTO,
   ) {
-    await this.deleteServiceUseCase.handle({ serviceId: id });
+    await this.deleteServiceUseCase.handle({
+      serviceId: id,
+      companyId: user.id,
+    });
     return {
       message: 'Successfully service deleted',
     };

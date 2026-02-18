@@ -3,10 +3,9 @@ import {
   PLAN_REPOSITORY,
   type PlanRepository,
 } from 'src/domain/repositories/plan.repository';
-import { NotFoundException } from '@nestjs/common';
 import { ListOnePlanDTO } from '../dtos/list-plans.dto';
 import { Plan } from 'src/domain/entities/plan';
-import { PriceConverter } from '../common/price-converter.common';
+import { NotFoundException } from '../exceptions/not-found.exception';
 
 @Injectable()
 export class ListPlansUseCase {
@@ -16,33 +15,20 @@ export class ListPlansUseCase {
   ) {}
 
   async one(data: ListOnePlanDTO): Promise<{ plan: Plan }> {
-    const planExists = await this.planRepository.findById(data.planId);
+    const plan = await this.planRepository.findById(data.planId);
 
-    if (!planExists) throw new NotFoundException('Plan not found');
-
-    const plan = new Plan({
-      id: planExists.id,
-      name: planExists.name,
-      type: planExists.type,
-      price: PriceConverter.toResponse(planExists.price),
-      description: planExists.description,
-    });
+    if (!plan)
+      throw new NotFoundException(
+        `Plan ${data.planId} not found`,
+        'Plan not found',
+        ListPlansUseCase.name,
+      );
 
     return { plan };
   }
 
   async all(): Promise<{ plans: Plan[] | [] }> {
-    const plansExists = await this.planRepository.findAll();
-
-    const plans = plansExists.map((p: Plan) => {
-      return new Plan({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        price: PriceConverter.toResponse(p.price),
-        description: p.description,
-      });
-    });
+    const plans = await this.planRepository.findAll();
 
     return { plans };
   }

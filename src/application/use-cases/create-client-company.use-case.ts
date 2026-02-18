@@ -14,6 +14,11 @@ import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
+import { Feature } from 'src/domain/entities/subscription';
+import {
+  SUBSCRIPTION_POLICY_SERVICE,
+  type ISubscriptionPolicyService,
+} from '../services/isubcription-policy.service';
 
 @Injectable()
 export class CreateClientCompanyUseCase {
@@ -24,11 +29,18 @@ export class CreateClientCompanyUseCase {
     private clientCompanyRepository: ClientCompanyRepository,
     @Inject(DATE_TRANSFORM_SERVICE)
     private dateTransformService: DateTransformService,
+    @Inject(SUBSCRIPTION_POLICY_SERVICE)
+    private subscriptionPolicyService: ISubscriptionPolicyService,
   ) {}
 
   async handle(
     data: CreateClientCompanyDTO,
   ): Promise<{ clientCompanyId: string }> {
+    await this.subscriptionPolicyService.handle(
+      data.companyId,
+      Feature.CLIENT_COMPANY,
+    );
+
     const clientId = await this.verifyClientExists(
       data.fullName,
       data.internationalId,

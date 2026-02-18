@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PupperteertPdfService } from '../pdf/pupperteer/pupperteer-pdf.service';
+import { PupperteertPdfService } from '../services/pdf/pupperteer/pupperteer-pdf.service';
 import { PDF_SERVICE } from 'src/application/services/pdf.service';
-import { HandlebarsTemplateCompilerService } from '../pdf/handlebars/handlebars-template-compiler.service';
+import { HandlebarsTemplateCompilerService } from '../services/pdf/handlebars/handlebars-template-compiler.service';
 import { INVOICE_PDF_STORAGE_SERVICE } from 'src/application/services/invoice-pdf-storage.service';
-import { LocalInvoicePdfStorageService } from '../local-storage/local-invoice-pdf-storage.service';
+import { LocalInvoicePdfStorageService } from '../services/local-storage/local-invoice-pdf-storage.service';
 
 @Module({
   providers: [

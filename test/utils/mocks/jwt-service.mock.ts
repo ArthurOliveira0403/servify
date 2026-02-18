@@ -1,6 +1,5 @@
-import { JwtService } from 'src/application/services/jwt.service';
+import { IJwtService } from 'src/application/services/ijwt.service';
 
-export const JwtServiceMock: JwtService = {
-  signCompany: jest.fn().mockResolvedValue('fake-token'),
-  signAdmin: jest.fn().mockResolvedValue('fake-token'),
+export const JwtServiceMock: IJwtService = {
+  sign: jest.fn().mockReturnValue('fake-token'),
 };

@@ -5,6 +5,7 @@ export type InvoiceStatus = 'VALID' | 'INVALID';
 interface InvoiceProps {
   id?: string;
 
+  companyId: string;
   companyName: string;
   companyCnpj: string;
   companyPhone?: string;
@@ -35,6 +36,7 @@ interface InvoiceProps {
 
 export class Invoice {
   private readonly _id: string;
+  private readonly _companyId: string;
   private readonly _companyName: string;
   private readonly _companyCnpj: string;
   private readonly _companyPhone: string | null;
@@ -56,6 +58,7 @@ export class Invoice {
 
   constructor(props: InvoiceProps) {
     this._id = props.id ?? randomUUID();
+    this._companyId = props.companyId;
     this._companyName = props.companyName;
     this._companyCnpj = props.companyCnpj;
     this._companyPhone = props.companyPhone ?? null;
@@ -89,6 +92,9 @@ export class Invoice {
 
   get id() {
     return this._id;
+  }
+  get companyId() {
+    return this._companyId;
   }
   get companyName() {
     return this._companyName;

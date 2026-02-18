@@ -1,48 +1,39 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CreateSusbcriptionUseCase } from 'src/application/use-cases/create-subscription.use-case';
-import { JwtAuthCompanyGuard } from '../../jwt/guards/jwt-auth-company.guard';
-import { ListActiveSubscription } from 'src/application/use-cases/list-active-subscription.use-case';
+import { ListActiveSubscriptionUseCase } from 'src/application/use-cases/list-active-subscription.use-case';
 import { Timezone } from 'src/infra/decorators/timezone.decorator';
 import { CancelSubscriptionUseCase } from 'src/application/use-cases/cancel-subscription.use-case';
 import {
-  createSubscriptionBodySchema,
-  type CreateSubscriptionBodyDTO,
+  type CreateSubscriptionParamDTO,
+  createSubscriptionParamSchema,
 } from 'src/infra/schemas/create-subscription.schemas';
-import { Zod } from 'src/infra/decorators/zod-decorator';
+import { Zod } from 'src/infra/decorators/zod.decorator';
 import {
   type CancelSubscriptionParamDTO,
   cancelSubscriptionsParamSchema,
 } from 'src/infra/schemas/cancel-subscription.schemas';
-import { CurrentCompanyUser } from 'src/infra/decorators/current-company-user.decorator';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
 import { SubscriptionResponseMapper } from '../mappers/subscription-response.mapper';
+import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 
 @Controller('subscription')
 export class SubscriptionController {
   constructor(
     private createSubscriptionUseCase: CreateSusbcriptionUseCase,
-    private listActiveSubscriptionUseCase: ListActiveSubscription,
+    private listActiveSubscriptionUseCase: ListActiveSubscriptionUseCase,
     private cancelSubscriptionUseCase: CancelSubscriptionUseCase,
     private subscriptionResponseMapper: SubscriptionResponseMapper,
   ) {}
 
-  @Post()
-  @UseGuards(JwtAuthCompanyGuard)
+  @Post(':planId')
   async create(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
-    @Body(Zod(createSubscriptionBodySchema)) data: CreateSubscriptionBodyDTO,
+    @CurrentUser() user: AuthUser,
+    @Param('planId', Zod(createSubscriptionParamSchema))
+    planId: CreateSubscriptionParamDTO,
   ) {
     const { subscriptionId } = await this.createSubscriptionUseCase.handle({
       companyId: user.id,
-      planId: data.planId,
+      planId,
     });
     return {
       message: 'Subscription succesfully created',
@@ -51,11 +42,7 @@ export class SubscriptionController {
   }
 
   @Get()
-  @UseGuards(JwtAuthCompanyGuard)
-  async getStatus(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
-    @Timezone() tz: string,
-  ) {
+  async getActive(@CurrentUser() user: AuthUser, @Timezone() tz: string) {
     const { subscription } = await this.listActiveSubscriptionUseCase.handle({
       companyId: user.id,
     });
@@ -67,9 +54,8 @@ export class SubscriptionController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthCompanyGuard)
   async cancel(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Param('id', Zod(cancelSubscriptionsParamSchema))
     id: CancelSubscriptionParamDTO,
   ) {

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { PLAN_REPOSITORY } from 'src/domain/repositories/plan.repository';
 import type { PlanRepository } from 'src/domain/repositories/plan.repository';
 import { UpdatePlanDTO } from '../dtos/update-plan.dto';
@@ -8,6 +8,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { PriceConverter } from '../common/price-converter.common';
+import { NotFoundException } from '../exceptions/not-found.exception';
 
 export class UpdatePlanUseCase {
   constructor(
@@ -17,33 +18,25 @@ export class UpdatePlanUseCase {
     private dateTransformService: DateTransformService,
   ) {}
 
-  async handle(id: string, data: UpdatePlanDTO): Promise<{ plan: Plan }> {
-    const planExist = await this.planRepository.findById(id);
-
-    if (!id) throw new BadRequestException('ID não informado');
-
-    if (!planExist) throw new NotFoundException('Plan not found');
+  async handle(data: UpdatePlanDTO): Promise<{ plan: Plan }> {
+    const planExist = await this.planRepository.findById(data.planId);
+    if (!planExist)
+      throw new NotFoundException(
+        `Plan ${data.planId} not found`,
+        'Plan not found',
+        UpdatePlanUseCase.name,
+      );
 
     planExist.update({
-      name: data.name,
-      type: data.type,
+      ...data,
       price: data.price ? PriceConverter.toRepository(data.price) : undefined,
-      description: data.description,
       updatedAt: this.dateTransformService.nowUTC(),
     });
 
     await this.planRepository.update(planExist);
 
-    const planUpdated = await this.planRepository.findById(id);
+    const plan = await this.planRepository.findById(data.planId);
 
-    const plan = new Plan({
-      id: planUpdated!.id,
-      name: planUpdated!.name,
-      type: planUpdated!.type,
-      price: PriceConverter.toResponse(planUpdated!.price),
-      description: planUpdated!.description,
-    });
-
-    return { plan };
+    return { plan: plan! };
   }
 }

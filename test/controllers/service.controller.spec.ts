@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateServiceUseCase } from 'src/application/use-cases/create-service.use-case';
 import { DeleteServiceUseCase } from 'src/application/use-cases/delete-service.use-case';
@@ -8,8 +8,11 @@ import { ListServicesUseCase } from 'src/application/use-cases/list-services.use
 import { UpdateServiceUseCase } from 'src/application/use-cases/update-service.use-case';
 import { Service } from 'src/domain/entities/service';
 import { ServiceController } from 'src/infra/http/controllers/service.controller';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
 import { ServiceReponseMapper } from 'src/infra/http/mappers/service-response.mapper';
+import { SubscriptionModule } from 'src/infra/modules/subscription.module';
+import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { UpdateServiceBodyDTO } from 'src/infra/schemas/update-service.schemas';
 
 const createServiceUseCaseMock = {
   provide: CreateServiceUseCase,
@@ -43,9 +46,8 @@ describe('ServiceController', () => {
   let serviceController: ServiceController;
   let spies: any;
 
-  const user: ReturnCompanyUser = {
+  const user: AuthUser = {
     id: '1',
-    cnpj: '1234567890',
     email: 'email@email.com',
     role: 'COMPANY',
   };
@@ -58,8 +60,7 @@ describe('ServiceController', () => {
 
   const serviceMock1Id = '1';
 
-  const dataToUpdate = {
-    serviceId: serviceMock1Id,
+  const dataToUpdate: UpdateServiceBodyDTO = {
     name: 'Tire repair',
     description: 'A complete tire repair',
     basePrice: 69.99,
@@ -89,6 +90,7 @@ describe('ServiceController', () => {
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [SubscriptionModule, DateTrasnformModule],
       providers: [
         createServiceUseCaseMock,
         listServicesUseCaseMock,
@@ -171,9 +173,9 @@ describe('ServiceController', () => {
     const serviceUpdated = new Service({
       id: serviceMock1Id,
       companyId: serviceMock1.companyId,
-      name: dataToUpdate.name,
-      description: dataToUpdate.description,
-      basePrice: dataToUpdate.basePrice,
+      name: dataToUpdate.name!,
+      description: dataToUpdate.description!,
+      basePrice: dataToUpdate.basePrice!,
     });
 
     spies.updateServiceUseCase.handle.mockResolvedValue({
@@ -181,13 +183,16 @@ describe('ServiceController', () => {
     });
 
     const response = await serviceController.update(
+      user,
       serviceMock1Id,
       dataToUpdate,
     );
 
-    expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith(
-      dataToUpdate,
-    );
+    expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith({
+      ...dataToUpdate,
+      serviceId: serviceMock1Id,
+      companyId: user.id,
+    });
 
     expect(spies.serviceResponseMapper.unique).toHaveBeenCalled();
 
@@ -197,7 +202,7 @@ describe('ServiceController', () => {
     );
   });
 
-  it('should throw NotFoundException when the service does not exists', async () => {
+  it('should throw NotFoundException when the service exist not', async () => {
     spies.updateServiceUseCase.handle.mockRejectedValue(
       new NotFoundException(),
     );
@@ -205,11 +210,33 @@ describe('ServiceController', () => {
     const fakeServiceId = '1234567';
 
     await expect(
-      serviceController.update(fakeServiceId, dataToUpdate),
+      serviceController.update(user, fakeServiceId, dataToUpdate),
     ).rejects.toThrow(NotFoundException);
     expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith({
       ...dataToUpdate,
       serviceId: fakeServiceId,
+      companyId: user.id,
+    });
+  });
+
+  it('should throw ForbiddenException when the service belong not the company', async () => {
+    spies.updateServiceUseCase.handle.mockRejectedValue(
+      new ForbiddenException(),
+    );
+
+    const fakeCompanyId = '1234567';
+
+    await expect(
+      serviceController.update(
+        { ...user, id: fakeCompanyId },
+        serviceMock1Id,
+        dataToUpdate,
+      ),
+    ).rejects.toThrow(ForbiddenException);
+    expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith({
+      ...dataToUpdate,
+      serviceId: serviceMock1Id,
+      companyId: fakeCompanyId,
     });
   });
 
@@ -217,26 +244,44 @@ describe('ServiceController', () => {
   it('should delete a Service', async () => {
     spies.deleteServiceUseCase.handle.mockResolvedValue(undefined);
 
-    const response = await serviceController.delete(serviceMock1Id);
+    const response = await serviceController.delete(user, serviceMock1Id);
 
     expect(spies.deleteServiceUseCase.handle).toHaveBeenCalledWith({
       serviceId: serviceMock1Id,
+      companyId: user.id,
     });
     expect(response.message).toBe('Successfully service deleted');
   });
 
-  it('should throw NotFoundException when the service does not exists', async () => {
+  it('should throw NotFoundException when the service exist not', async () => {
     spies.deleteServiceUseCase.handle.mockRejectedValue(
       new NotFoundException(),
     );
 
     const fakeServiceId = '123456';
 
-    await expect(serviceController.delete(fakeServiceId)).rejects.toThrow(
+    await expect(serviceController.delete(user, fakeServiceId)).rejects.toThrow(
       NotFoundException,
     );
     expect(spies.deleteServiceUseCase.handle).toHaveBeenCalledWith({
       serviceId: fakeServiceId,
+      companyId: user.id,
+    });
+  });
+
+  it('should throw NotFoundException when the service belong not the company', async () => {
+    spies.deleteServiceUseCase.handle.mockRejectedValue(
+      new ForbiddenException(),
+    );
+
+    const fakeCompanyId = '123456';
+
+    await expect(
+      serviceController.delete({ ...user, id: fakeCompanyId }, serviceMock1Id),
+    ).rejects.toThrow(ForbiddenException);
+    expect(spies.deleteServiceUseCase.handle).toHaveBeenCalledWith({
+      serviceId: serviceMock1Id,
+      companyId: fakeCompanyId,
     });
   });
 });

@@ -1,15 +1,20 @@
-import { INestApplication } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
+import { JwtAuthGuard } from 'src/infra/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/infra/guards/roles.guard';
 import { AuthModule } from 'src/infra/modules/auth.module';
 import { CompanyModule } from 'src/infra/modules/company.module';
 import { SignUpBodyDTO } from 'src/infra/schemas/sign-up.schemas';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { singUpAndLogin } from 'test/utils/helpers/sign-up-and-login.helper';
 
 describe('Company (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: NestFastifyApplication;
 
   const companyData: SignUpBodyDTO = {
     name: 'Lumin',
@@ -30,10 +35,23 @@ describe('Company (e2e)', () => {
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [CompanyModule, AuthModule],
+      providers: [
+        {
+          provide: APP_GUARD,
+          useClass: JwtAuthGuard,
+        },
+        {
+          provide: APP_GUARD,
+          useClass: RolesGuard,
+        },
+      ],
     }).compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterAll(async () => {

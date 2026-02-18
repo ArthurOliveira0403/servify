@@ -6,8 +6,10 @@ import { Subscription } from 'src/domain/entities/subscription';
 import { PLAN_REPOSITORY } from 'src/domain/repositories/plan.repository';
 import type { PlanRepository } from 'src/domain/repositories/plan.repository';
 import { PlanType } from 'src/domain/entities/plan';
-import { DATE_TRANSFORM_SERVICE } from '../services/date-transform.service';
-import type { DateTransformService } from '../services/date-transform.service';
+import {
+  DATE_TRANSFORM_SERVICE,
+  type DateTransformService,
+} from '../services/date-transform.service';
 import { ConflictException } from '../exceptions/conflict.exception';
 import { NotFoundException } from '../exceptions/not-found.exception';
 
@@ -47,10 +49,17 @@ export class CreateSusbcriptionUseCase {
     const now = this.dateTrasnformService.nowUTC();
 
     const endDate = this.calculateEndDate(now, plan.type);
+
     const subscription = new Subscription({
       companyId: data.companyId,
       planId: data.planId,
+      planName: plan.name,
+      planType: plan.type,
       price: plan.price,
+      servicesLimit: plan.servicesLimit,
+      serviceExecutionsLimit: plan.serviceExecutionsLimit,
+      clientCompanysLimit: plan.clientCompanysLimit,
+      invoicesLimit: plan.invoicesLimit,
       startDate: now,
       endDate: endDate,
       createdAt: now,

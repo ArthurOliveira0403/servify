@@ -5,7 +5,7 @@ import type { SubscriptionRepository } from 'src/domain/repositories/subscriptio
 import { ListActiveSubscriptionDTO } from '../dtos/list-active-subscription.dto';
 
 @Injectable()
-export class ListActiveSubscription {
+export class ListActiveSubscriptionUseCase {
   constructor(
     @Inject(SUBSCRIPTION_REPOSITORY)
     private subscriptionRepository: SubscriptionRepository,

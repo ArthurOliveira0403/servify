@@ -39,7 +39,7 @@ export class GenerateInvoicePdfUseCase {
     const invoice = await this.invoiceRepository.findById(data.invoiceId);
     if (!invoice) throw new NotFoundException('Invoice not found');
 
-    if (invoice.companyCnpj !== data.companyCnpj)
+    if (invoice.companyId !== data.companyId)
       throw new UnauthorizedException(
         'The invoice does not belong to the User Company',
       );

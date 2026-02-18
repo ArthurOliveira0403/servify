@@ -1,20 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { JwtAuthAdminGuard } from 'src/infra/jwt/guards/jwt-auth-admin.guard';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CreatePlanUseCase } from '../../../application/use-cases/create-plan.use-case';
 import { UpdatePlanUseCase } from '../../../application/use-cases/update-plan.use-case';
 import {
   createPlanBodySchema,
   type CreatePlanBodyDTO,
 } from 'src/infra/schemas/create-plan.schemas';
-import { Zod } from 'src/infra/decorators/zod-decorator';
+import { Zod } from 'src/infra/decorators/zod.decorator';
 import {
   type ListOnePlanParamDTO,
   listOnePlanParamSchema,
@@ -27,8 +18,10 @@ import {
 } from 'src/infra/schemas/update-plan.schemas';
 import { PlanResponseMapper } from '../mappers/plan-response.mapper';
 import { ListPlansUseCase } from 'src/application/use-cases/list-plans.use-case';
-import { JwtAuthCompanyGuard } from 'src/infra/jwt/guards/jwt-auth-company.guard';
+import { Plan } from 'src/domain/entities/plan';
+import { Roles } from 'src/infra/decorators/roles.decorator';
 
+@Roles('ADMIN')
 @Controller('plan')
 export class PlanController {
   constructor(
@@ -38,7 +31,6 @@ export class PlanController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthAdminGuard)
   async create(@Body(Zod(createPlanBodySchema)) data: CreatePlanBodyDTO) {
     const { planId } = await this.createPlanUseCase.handle(data);
     return {
@@ -48,7 +40,6 @@ export class PlanController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthCompanyGuard)
   async listOne(
     @Param('id', Zod(listOnePlanParamSchema)) id: ListOnePlanParamDTO,
   ) {
@@ -59,21 +50,23 @@ export class PlanController {
   }
 
   @Get()
-  @UseGuards(JwtAuthCompanyGuard)
   async listAll() {
     const { plans } = await this.listPlansUseCase.all();
+
     return {
-      plans: plans.forEach((p) => PlanResponseMapper.handle(p)),
+      plans: (plans ?? []).map((p: Plan) => PlanResponseMapper.handle(p)),
     };
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthAdminGuard)
   async update(
     @Param('id', Zod(updatePlanParamSchema)) id: UpdatePlanParamDTO,
     @Body(Zod(updatePlanBodySchema)) data: UpdatePlanBodyDTO,
   ) {
-    const { plan } = await this.updatePlanUseCase.handle(id, data);
+    const { plan } = await this.updatePlanUseCase.handle({
+      ...data,
+      planId: id,
+    });
     return {
       message: 'Plan successfully updated',
       plan: PlanResponseMapper.handle(plan),

@@ -37,6 +37,7 @@ model Company {
   clientsCompany     ClientCompany[]
   servicesExecutions ServiceExecution[]
   subscriptions      Subscription[]
+  invoices           Invoice[]
 
   @@map("company")
 }
@@ -129,6 +130,7 @@ enum InvoiceStatus {
 
 model Invoice {
   id                      String           @id @default(uuid())
+  company_id              String
   company_name            String
   company_cnpj            String
   company_phone           String?
@@ -148,7 +150,8 @@ model Invoice {
   created_at              DateTime         @default(now()) // UTC
   updated_at              DateTime         @updatedAt // UTC
 
-  service                 ServiceExecution @relation(fields: [service_execution_id], references: [id])
+  service_execution       ServiceExecution @relation(fields: [service_execution_id], references: [id])
+  company                 Company          @relation(fields: [company_id], references: [id])
 
   @@map("invoice")
 }
@@ -159,20 +162,26 @@ enum SubscriptionStatus {
 }
 
 model Subscription {
-  id           String             @id @default(uuid())
-  company_id   String          
-  plan_id      String
-  price        Int
-  status       SubscriptionStatus
-  start_date   DateTime
-  end_date     DateTime
-  renewal_date DateTime
-  auto_renew   Boolean
-  created_at   DateTime           @default(now())
-  updated_at   DateTime           @updatedAt
+  id                       String             @id @default(uuid())
+  company_id               String          
+  plan_id                  String             
+  plan_name                String 
+  plan_type                PlanType            
+  price                    Int
+  services_limit           Int
+  service_executions_limit Int
+  client_companys_limit    Int
+  invoices_limit           Int
+  status                   SubscriptionStatus
+  start_date               DateTime
+  end_date                 DateTime
+  renewal_date             DateTime
+  auto_renew               Boolean
+  created_at               DateTime           @default(now())
+  updated_at               DateTime           @updatedAt
 
   company      Company            @relation(fields: [company_id], references: [id], onDelete: Cascade)
-  plan         Plan               @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  plan         Plan               @relation(fields: [plan_id], references: [id])
   
   @@map("subscription")
 }
@@ -183,14 +192,18 @@ enum PlanType {
 }
 
 model Plan {
-  id            String         @id
-  name          String         @unique
-  type          PlanType
-  price         Int
-  description   String
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  subscriptions Subscription[]
+  id                       String         @id @default(uuid())
+  name                     String         @unique
+  type                     PlanType
+  price                    Int
+  services_limit           Int
+  service_executions_limit Int
+  client_companys_limit    Int
+  invoices_limit           Int
+  created_at               DateTime       @default(now())
+  updated_at               DateTime       @updatedAt
+  subscriptions            Subscription[]
+
 
   @@map("plan")
 }

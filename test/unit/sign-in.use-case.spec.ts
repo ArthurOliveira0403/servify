@@ -2,7 +2,7 @@
 import { HasherService } from 'src/application/services/password-hasher.service';
 import { SignInUseCase } from 'src/application/use-cases/sign-in.use-case';
 import { CompanyRepository } from 'src/domain/repositories/company.repository';
-import { JwtService } from 'src/application/services/jwt.service';
+import { IJwtService } from 'src/application/services/ijwt.service';
 import { InMemoryCompanyRepository } from 'test/utils/in-memory/in-memory.company-repository';
 import { HasherServiceMock } from 'test/utils/mocks/hasher-service.mock';
 import { JwtServiceMock } from 'test/utils/mocks/jwt-service.mock';
@@ -14,7 +14,7 @@ describe('SignInUseCase', () => {
   let useCase: SignInUseCase;
   let repository: CompanyRepository;
   let hasher: HasherService;
-  let jwtService: JwtService;
+  let jwtService: IJwtService;
   let spies: any;
   let companyMock: Company;
   let hashPassword: string;
@@ -35,7 +35,7 @@ describe('SignInUseCase', () => {
     spies = {
       findByEmail: jest.spyOn(repository, 'findByEmail'),
       compare: jest.spyOn(hasher, 'compare'),
-      sign: jest.spyOn(jwtService, 'signCompany'),
+      sign: jest.spyOn(jwtService, 'sign'),
     };
 
     hashPassword = await hasher.hash(data.password);
@@ -52,7 +52,6 @@ describe('SignInUseCase', () => {
     expect(spies.compare).toHaveBeenCalledWith(data.password, hashPassword);
     expect(spies.sign).toHaveBeenCalledWith({
       sub: companyMock.id,
-      cnpj: companyMock.cnpj,
       email: companyMock.email,
       role: companyMock.role,
     });

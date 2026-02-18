@@ -7,8 +7,7 @@ import {
 import type { CompanyRepository } from 'src/domain/repositories/company.repository';
 import { COMPANY_REPOSITORY } from 'src/domain/repositories/company.repository';
 import { SignInDTO } from '../dtos/sign-in.dto';
-import { JWT_SERVICE } from '../services/jwt.service';
-import type { JwtService } from '../services/jwt.service';
+import { type IJwtService, JWT_SERVICE } from '../services/ijwt.service';
 import {
   HASHER_SERVICE,
   type HasherService,
@@ -22,7 +21,7 @@ export class SignInUseCase {
     @Inject(HASHER_SERVICE)
     private passwordHasher: HasherService,
     @Inject(JWT_SERVICE)
-    private tokenService: JwtService,
+    private tokenService: IJwtService,
   ) {}
   async handle(data: SignInDTO): Promise<string> {
     const company = await this.companyRepository.findByEmail(data.email);
@@ -37,9 +36,8 @@ export class SignInUseCase {
     if (!isMatch)
       throw new UnauthorizedException('Email or password incorrects');
 
-    const accessToken = await this.tokenService.signCompany({
+    const accessToken = this.tokenService.sign({
       sub: company.id,
-      cnpj: company.cnpj,
       email: company.email,
       role: company.role,
     });

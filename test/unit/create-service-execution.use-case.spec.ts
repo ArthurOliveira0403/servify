@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreateServiceExecutionDTO } from 'src/application/dtos/create-service-execution.dto';
-import { DateTransformService } from 'src/application/services/date-transform.service';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
 import { ClientCompany } from 'src/domain/entities/client-company';
 import { Service } from 'src/domain/entities/service';
 import { ServiceExecution } from 'src/domain/entities/service-execution';
+import { Feature } from 'src/domain/entities/subscription';
 import { ClientCompanyRepository } from 'src/domain/repositories/client-company.repository';
 import { ServiceExecutionRepository } from 'src/domain/repositories/service-execution.repository';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
@@ -13,13 +13,13 @@ import { InMemoryClientCompanyRepository } from 'test/utils/in-memory/in-memory.
 import { InMemoryServiceExecutionRespository } from 'test/utils/in-memory/in-memory.service-execution-repository';
 import { InMemoryServiceRepository } from 'test/utils/in-memory/in-memory.service-repository';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('CreateServiceExecutionUseCase', () => {
   let useCase: CreateServiceExecutionUseCase;
   let serviceExecutionRepository: ServiceExecutionRepository;
   let serviceRepository: ServiceRespository;
   let clientCompanyRepository: ClientCompanyRepository;
-  let dateTransformService: DateTransformService;
   let spies: any;
 
   const companyId = '1';
@@ -49,16 +49,21 @@ describe('CreateServiceExecutionUseCase', () => {
     serviceExecutionRepository = new InMemoryServiceExecutionRespository();
     serviceRepository = new InMemoryServiceRepository();
     clientCompanyRepository = new InMemoryClientCompanyRepository();
-    dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformMock;
+    const subscriptionPolicyService = SubscriptionPolicyServiceMock;
 
     useCase = new CreateServiceExecutionUseCase(
       serviceExecutionRepository,
       serviceRepository,
       clientCompanyRepository,
       dateTransformService,
+      subscriptionPolicyService,
     );
 
     spies = {
+      subscriptionPolicyService: {
+        handle: jest.spyOn(subscriptionPolicyService, 'handle'),
+      },
       serviceRepository: {
         findById: jest.spyOn(serviceRepository, 'findById'),
       },
@@ -80,6 +85,11 @@ describe('CreateServiceExecutionUseCase', () => {
 
     const response = await useCase.handle(data);
 
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
+
     expect(spies.serviceRepository.findById).toHaveBeenCalledWith(
       data.serviceId,
     );
@@ -92,7 +102,7 @@ describe('CreateServiceExecutionUseCase', () => {
     );
 
     const serviceExecutionId = (
-      await serviceExecutionRepository.findManyByCompanyId(data.companyId)
+      await serviceExecutionRepository.findManyByCompany(data.companyId)
     )[0].id;
 
     expect(response.serviceExecutionId).toBe(serviceExecutionId);
@@ -103,6 +113,11 @@ describe('CreateServiceExecutionUseCase', () => {
     await clientCompanyRepository.save(clientCompanyMock);
 
     const fakeServiceId = '1234567890';
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
 
     await expect(
       useCase.handle({ ...data, serviceId: fakeServiceId }),
@@ -115,12 +130,17 @@ describe('CreateServiceExecutionUseCase', () => {
 
     const fakeClienCompanyId = '1234567890';
 
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
+
     await expect(
       useCase.handle({ ...data, clientCompanyId: fakeClienCompanyId }),
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('should throw a BadRequestException when the Service companyId does not match with the ClientCompany companyId', async () => {
+  it('should throw a ForbiddenException when the Service companyId does not match with the ClientCompany companyId', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -134,10 +154,15 @@ describe('CreateServiceExecutionUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, serviceId: otherServiceMock.id }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
   });
 
-  it('should throw a BadRequestException when the Service companyId does not match with the "User" companyId', async () => {
+  it('should throw a ForbiddenException when the Service companyId does not match with the "User" companyId', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -145,6 +170,11 @@ describe('CreateServiceExecutionUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, companyId: otherCompanyId }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE_EXECUTION,
+    );
   });
 });

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ADMIN_REPOSITORY } from 'src/domain/repositories/admin.repository';
-import { PrismaAdminRepository } from '../prisma/repositories/prisma-admin.respository';
+import { PrismaAdminRepository } from '../services/prisma/repositories/prisma-admin.respository';
 import { DatabaseModule } from './database.module';
 
 @Module({

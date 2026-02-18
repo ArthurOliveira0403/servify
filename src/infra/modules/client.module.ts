@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CLIENT_REPOSITORY } from 'src/domain/repositories/client.repository';
-import { PrismaClientRepository } from '../prisma/repositories/prisma-client.repository';
+import { PrismaClientRepository } from '../services/prisma/repositories/prisma-client.repository';
 import { DatabaseModule } from './database.module';
 
 @Module({

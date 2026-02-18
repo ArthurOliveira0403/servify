@@ -19,9 +19,7 @@ export class InMemoryServiceExecutionRespository
     return serviceExecutionFound ?? null;
   }
 
-  async findManyByCompanyId(
-    companyId: string,
-  ): Promise<ServiceExecution[] | []> {
+  async findManyByCompany(companyId: string): Promise<ServiceExecution[] | []> {
     const servicesExecutions = await this.servicesExecutions.filter(
       (s) => s.companyId === companyId,
     );
@@ -29,7 +27,7 @@ export class InMemoryServiceExecutionRespository
     return servicesExecutions ?? [];
   }
 
-  async findManyByClientCompanyId(
+  async findManyByClientCompany(
     clientCompanyId: string,
   ): Promise<ServiceExecution[] | []> {
     const servicesExecutions = await this.servicesExecutions.filter(

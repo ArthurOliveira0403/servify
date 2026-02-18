@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DeleteServiceUseCase } from 'src/application/use-cases/delete-service.use-case';
 import { Service } from 'src/domain/entities/service';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
@@ -10,17 +10,18 @@ describe('DeleteServiceUseCase', () => {
   let repository: ServiceRespository;
   let spies: any;
 
+  const companyId = '1232456';
   const serviceId = '1';
 
   const serviceMock = new Service({
     id: serviceId,
     name: 'Service',
-    companyId: '2',
+    companyId,
     description: 'A service',
     basePrice: 159.99,
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     repository = new InMemoryServiceRepository();
     useCase = new DeleteServiceUseCase(repository);
 
@@ -30,11 +31,12 @@ describe('DeleteServiceUseCase', () => {
         delete: jest.spyOn(repository, 'delete'),
       },
     };
+
+    await repository.save(serviceMock);
   });
 
   it('should delete a company', async () => {
-    await repository.save(serviceMock);
-    await useCase.handle({ serviceId });
+    await useCase.handle({ serviceId, companyId });
 
     expect(spies.serviceRespository.findById).toHaveBeenCalledWith(serviceId);
     expect(spies.serviceRespository.delete).toHaveBeenCalledWith(serviceId);
@@ -44,14 +46,26 @@ describe('DeleteServiceUseCase', () => {
   });
 
   it('should throw a NotFoundException when serviceId is invalid', async () => {
-    await repository.save(serviceMock);
+    const fakeServiceId = '123456';
 
-    const fakeId = '123456';
+    await expect(
+      useCase.handle({ serviceId: fakeServiceId, companyId }),
+    ).rejects.toThrow(NotFoundException);
 
-    await expect(useCase.handle({ serviceId: fakeId })).rejects.toThrow(
-      NotFoundException,
+    expect(spies.serviceRespository.findById).toHaveBeenLastCalledWith(
+      fakeServiceId,
     );
+  });
 
-    expect(spies.serviceRespository.findById).toHaveBeenLastCalledWith(fakeId);
+  it('should throw a ForbiddenException when the service belong not the company', async () => {
+    const fakeCompanyId = '123456';
+
+    await expect(
+      useCase.handle({ serviceId, companyId: fakeCompanyId }),
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(spies.serviceRespository.findById).toHaveBeenLastCalledWith(
+      serviceId,
+    );
   });
 });

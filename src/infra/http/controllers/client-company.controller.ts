@@ -9,10 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateClientCompanyUseCase } from 'src/application/use-cases/create-client-company.use-case';
 import { UpdateClientCompanyUseCase } from 'src/application/use-cases/update-client-company.use-case';
-import { CurrentCompanyUser } from 'src/infra/decorators/current-company-user.decorator';
-import { Zod } from 'src/infra/decorators/zod-decorator';
-import { JwtAuthCompanyGuard } from 'src/infra/jwt/guards/jwt-auth-company.guard';
-import { ReturnCompanyUser } from 'src/infra/jwt/strategies/returns-jwt-strategy';
+import { Zod } from 'src/infra/decorators/zod.decorator';
 import { ClientCompanyResponseMapper } from 'src/infra/http/mappers/client-company-response.mapper';
 import {
   createClientCompanyBodySchema,
@@ -29,7 +26,12 @@ import {
   listOneClientCompanySchemaParam,
   type ListOneClientCompanyParamDTO,
 } from 'src/infra/schemas/list-one-client-company.schema';
+import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
+import { Roles } from 'src/infra/decorators/roles.decorator';
+import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
+import { AuthUser } from 'src/domain/common/auth-user.interface';
 
+@Roles('COMPANY')
 @Controller('client-company')
 export class ClientCompanyController {
   constructor(
@@ -39,9 +41,9 @@ export class ClientCompanyController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async create(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Body(Zod(createClientCompanyBodySchema)) data: CreateClientCompanyBodyDTO,
   ) {
     const { clientCompanyId } = await this.createClientCompanyUseCase.handle({
@@ -56,8 +58,8 @@ export class ClientCompanyController {
   }
 
   @Get()
-  @UseGuards(JwtAuthCompanyGuard)
-  async findAll(@CurrentCompanyUser() user: ReturnCompanyUser) {
+  @UseGuards(SubscriptionGuard)
+  async findAll(@CurrentUser() user: AuthUser) {
     const response = await this.listClientsCompanyUseCase.all({
       companyId: user.id,
     });
@@ -68,11 +70,11 @@ export class ClientCompanyController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async findOne(
     @Param('id', Zod(listOneClientCompanySchemaParam))
     id: ListOneClientCompanyParamDTO,
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
   ) {
     const { clientCompany, client } = await this.listClientsCompanyUseCase.one({
       companyId: user.id,
@@ -83,9 +85,9 @@ export class ClientCompanyController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthCompanyGuard)
+  @UseGuards(SubscriptionGuard)
   async update(
-    @CurrentCompanyUser() user: ReturnCompanyUser,
+    @CurrentUser() user: AuthUser,
     @Param('id', Zod(updateClientCompanyParamSchema))
     id: UpdateClientCompanyParamDTO,
     @Body(Zod(updateClientCompanyBodySchema)) data: UpdateClientCompanyBodyDTO,

@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreatePlanDTO } from '../dtos/create-plan.dto';
 import {
   PLAN_REPOSITORY,
@@ -10,6 +10,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { PriceConverter } from '../common/price-converter.common';
+import { ConflictException } from '../exceptions/conflict.exception';
 
 @Injectable()
 export class CreatePlanUseCase {
@@ -23,15 +24,18 @@ export class CreatePlanUseCase {
   async handle(data: CreatePlanDTO): Promise<{ planId: string }> {
     const existPlan = await this.planRepository.findByName(data.name);
 
-    if (existPlan) throw new ConflictException('The Plan already exist');
+    if (existPlan)
+      throw new ConflictException(
+        `The Plan with "${data.name}" name already exist`,
+        'The Plan with this name already exist',
+        CreatePlanUseCase.name,
+      );
 
     const price = PriceConverter.toRepository(data.price);
 
     const plan = new Plan({
-      name: data.name,
-      type: data.type,
+      ...data,
       price,
-      description: data.description,
       createdAt: this.dateTransformService.nowUTC(),
       updatedAt: this.dateTransformService.nowUTC(),
     });

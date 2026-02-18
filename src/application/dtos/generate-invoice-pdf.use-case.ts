@@ -1,4 +1,4 @@
 export abstract class GenerateInvoicePdfDTO {
-  companyCnpj: string;
+  companyId: string;
   invoiceId: string;
 }

@@ -16,7 +16,7 @@ export class InMemoryClientCompanyRepository
     return clientCompany ?? null;
   }
 
-  async findManyByCompanyId(companyId: string): Promise<ClientCompany[] | []> {
+  async findManyByCompany(companyId: string): Promise<ClientCompany[] | []> {
     const clientsCompany = await this.clientsCompany.filter(
       (c) => c.companyId === companyId,
     );

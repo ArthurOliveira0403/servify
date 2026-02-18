@@ -4,6 +4,7 @@ import {
   type DateTransformService,
 } from '../../../application/services/date-transform.service';
 import { Inject, Injectable } from '@nestjs/common';
+import { PriceConverter } from 'src/application/common/price-converter.common';
 
 @Injectable()
 export class SubscriptionResponseMapper {
@@ -16,8 +17,14 @@ export class SubscriptionResponseMapper {
     return {
       id: subscription.id,
       planId: subscription.planId,
-      price: subscription.price,
+      planName: subscription.planName,
+      planType: subscription.planType,
+      price: PriceConverter.toResponse(subscription.price),
       status: subscription.status,
+      servicesLimit: subscription.servicesLimit,
+      serviceExecutionsLimit: subscription.serviceExecutionsLimit,
+      clientCompanysLimit: subscription.clientCompanysLimit,
+      invoicesLimit: subscription.invoicesLimit,
       startDate: this.dateTransformService.formatInTimezone(
         subscription.startDate,
         tz,

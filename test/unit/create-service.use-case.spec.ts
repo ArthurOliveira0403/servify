@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { PriceConverter } from 'src/application/common/price-converter.common';
 import { CreateServiceDTO } from 'src/application/dtos/create-service.dto';
-import { DateTransformService } from 'src/application/services/date-transform.service';
 import { CreateServiceUseCase } from 'src/application/use-cases/create-service.use-case';
 import { Service } from 'src/domain/entities/service';
+import { Feature } from 'src/domain/entities/subscription';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
 import { InMemoryServiceRepository } from 'test/utils/in-memory/in-memory.service-repository';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('createServiceUseCase', () => {
   let useCase: CreateServiceUseCase;
   let serviceRepository: ServiceRespository;
-  let dateTransformService: DateTransformService;
   let spies: any;
 
   const data: CreateServiceDTO = {
@@ -23,10 +23,18 @@ describe('createServiceUseCase', () => {
 
   beforeEach(() => {
     serviceRepository = new InMemoryServiceRepository();
-    dateTransformService = dateTransformMock;
-    useCase = new CreateServiceUseCase(serviceRepository, dateTransformService);
+    const dateTransformService = dateTransformMock;
+    const subscriptionPolicyService = SubscriptionPolicyServiceMock;
+    useCase = new CreateServiceUseCase(
+      serviceRepository,
+      dateTransformService,
+      subscriptionPolicyService,
+    );
 
     spies = {
+      subscriptionPolicyService: {
+        handle: jest.spyOn(subscriptionPolicyService, 'handle'),
+      },
       serviceRepository: {
         save: jest.spyOn(serviceRepository, 'save'),
       },
@@ -41,6 +49,11 @@ describe('createServiceUseCase', () => {
 
   it('should save a service', async () => {
     const response = await useCase.handle(data);
+
+    expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
+      data.companyId,
+      Feature.SERVICE,
+    );
 
     expect(spies.priceConverter.toRepository).toHaveBeenCalledWith(
       data.basePrice,

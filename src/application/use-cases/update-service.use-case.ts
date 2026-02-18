@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   SERVICE_REPOSITORY,
   type ServiceRespository,
@@ -23,6 +28,9 @@ export class UpdateServiceUseCase {
   async handle(data: UpdateServiceDTO): Promise<{ service: Service }> {
     const service = await this.serviceRepository.findById(data.serviceId);
     if (!service) throw new NotFoundException('Service not found');
+
+    if (service.companyId !== data.companyId)
+      throw new ForbiddenException('The service not belong to the company');
 
     const basePrice = data.basePrice
       ? PriceConverter.toRepository(data.basePrice)

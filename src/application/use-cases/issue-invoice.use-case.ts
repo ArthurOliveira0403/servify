@@ -35,6 +35,11 @@ import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
+import { Feature } from 'src/domain/entities/subscription';
+import {
+  SUBSCRIPTION_POLICY_SERVICE,
+  type ISubscriptionPolicyService,
+} from '../services/isubcription-policy.service';
 
 @Injectable()
 export class IssueInvoiceUseCase {
@@ -53,9 +58,16 @@ export class IssueInvoiceUseCase {
     private companyRepository: CompanyRepository,
     @Inject(DATE_TRANSFORM_SERVICE)
     private dateTransformService: DateTransformService,
+    @Inject(SUBSCRIPTION_POLICY_SERVICE)
+    private subscriptionPolicyService: ISubscriptionPolicyService,
   ) {}
 
   async handle(data: IssueInvoiceDTO): Promise<{ invoiceId: string }> {
+    await this.subscriptionPolicyService.handle(
+      data.companyId,
+      Feature.INVOICE,
+    );
+
     const company = await this.companyRepository.findById(data.companyId);
     if (!company) throw new NotFoundException('Company User Not Found');
 
@@ -79,13 +91,14 @@ export class IssueInvoiceUseCase {
     );
 
     const invoiceIssued =
-      await this.invoiceRepository.findIssuedByServiceExecutionId(
+      await this.invoiceRepository.findIssuedByServiceExecution(
         data.serviceExecutionId,
       );
     if (invoiceIssued)
       throw new ConflictException('Invoice already exists for this execution');
 
     const invoice = new Invoice({
+      companyId: data.companyId,
       companyName: company.name,
       companyCnpj: company.cnpj,
       companyPhone: company.phoneNumber ?? undefined,

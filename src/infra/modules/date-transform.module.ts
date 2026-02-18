@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DayjsService } from '../dayjs/dayjs.service';
+import { DayjsService } from '../services/dayjs/dayjs.service';
 import { DATE_TRANSFORM_SERVICE } from 'src/application/services/date-transform.service';
 
 @Module({
