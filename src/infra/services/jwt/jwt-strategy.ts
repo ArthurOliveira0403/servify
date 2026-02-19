@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Inject, Injectable } from '@nestjs/common';
 import { TokenPayload } from 'src/application/services/ijwt.service';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import {
   type IValidateUserService,
   VALIDATE_USER_SERVICE,

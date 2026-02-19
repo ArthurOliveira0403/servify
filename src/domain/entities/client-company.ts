@@ -1,20 +1,21 @@
 import { randomUUID } from 'node:crypto';
+import { ClientCompanyException } from '../exceptions/client-company.exception';
 
-interface ClientCompanyProps {
+type ClientCompanyProps = {
   id?: string;
   companyId: string;
   clientId: string;
   email?: string;
   phone?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-interface UpdateDetailsProps {
+type UpdateDetailsProps = {
   email?: string;
   phone?: string;
-  updatedAt: Date;
-}
+  now: Date;
+};
 
 export class ClientCompany {
   private readonly _id: string;
@@ -26,19 +27,28 @@ export class ClientCompany {
   private _updatedAt: Date;
 
   constructor(props: ClientCompanyProps) {
+    this.validateProps(props);
+
     this._id = props.id ?? randomUUID();
     this._companyId = props.companyId;
     this._clientId = props.clientId;
     this._email = props.email ?? null;
     this._phone = props.phone ?? null;
-    this._createdAt = props.createdAt ?? new Date();
-    this._updatedAt = props.updatedAt ?? new Date();
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
   updateDetails(props: UpdateDetailsProps) {
+    this.validateProps(props);
+
     this._email = props.email ?? this.email;
     this._phone = props.phone ?? this.phone;
-    this._updatedAt = props.updatedAt;
+    this._updatedAt = props.now;
+  }
+
+  private validateProps(props: ClientCompanyProps | UpdateDetailsProps) {
+    if (!props.email?.includes('@'))
+      throw new ClientCompanyException('Invalid email');
   }
 
   get id() {

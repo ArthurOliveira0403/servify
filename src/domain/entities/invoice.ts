@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import { InvoiceException } from '../exceptions/invoice.exception';
 
 export type InvoiceStatus = 'VALID' | 'INVALID';
 
-interface InvoiceProps {
+type InvoiceProps = {
   id?: string;
 
   companyId: string;
@@ -18,10 +19,10 @@ interface InvoiceProps {
   serviceName: string;
   serviceDescription: string;
 
-  executedAt: Date;
+  executedAt: Date; // UTC
   price: number; // cents
 
-  issuedAt: Date;
+  issuedAt: Date; // UTC
 
   status?: InvoiceStatus;
   invoiceNumber: string;
@@ -30,9 +31,9 @@ interface InvoiceProps {
 
   timezone: string;
 
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date; // UTC
+  updatedAt: Date; // UTC
+};
 
 export class Invoice {
   private readonly _id: string;
@@ -46,15 +47,15 @@ export class Invoice {
   private readonly _serviceExecutionId: string;
   private readonly _serviceName: string;
   private readonly _serviceDescription: string;
-  private readonly _executedAt: Date;
+  private readonly _executedAt: Date; // UTC
   private readonly _price: number; // cents
-  private readonly _issuedAt: Date;
+  private readonly _issuedAt: Date; // UTC
   private _status: InvoiceStatus;
   private _invoiceNumber: string;
   private _pdfPath: string | null;
   private readonly _timezone: string;
-  private _createdAt: Date;
-  private _updatedAt: Date;
+  private _createdAt: Date; // UTC
+  private _updatedAt: Date; // UTC
 
   constructor(props: InvoiceProps) {
     this._id = props.id ?? randomUUID();
@@ -75,19 +76,21 @@ export class Invoice {
     this._invoiceNumber = props.invoiceNumber;
     this._pdfPath = props.pdfPath ?? null;
     this._timezone = props.timezone;
-    this._createdAt = props.createdAt ?? new Date();
-    this._updatedAt = props.updatedAt ?? new Date();
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
-  cancel() {
-    if (this.status === 'INVALID') throw new Error('Invoice already canceled');
+  cancel(now: Date) {
+    if (this.status === 'INVALID')
+      throw new InvoiceException('Cannot cancel a invalid invoice');
 
     this._status = 'INVALID';
-    this._updatedAt = new Date();
+    this._updatedAt = now;
   }
 
-  update(pdfPath: string) {
+  updatePdfPath(pdfPath: string, now: Date) {
     this._pdfPath = pdfPath;
+    this._updatedAt = now;
   }
 
   get id() {

@@ -20,7 +20,7 @@ import {
 import type { FastifyReply } from 'fastify';
 import { Timezone } from 'src/infra/decorators/timezone.decorator';
 import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { Zod } from 'src/infra/decorators/zod.decorator';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
 import { Roles } from 'src/infra/decorators/roles.decorator';

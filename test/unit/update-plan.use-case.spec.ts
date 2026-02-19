@@ -21,6 +21,8 @@ describe('UpdatePlanUseCase', () => {
     serviceExecutionsLimit: 15,
     clientCompanysLimit: 15,
     invoicesLimit: 15,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const now = new Date('2026-01-01T00:00:00Z');
@@ -62,7 +64,7 @@ describe('UpdatePlanUseCase', () => {
     expect(spies.plan.update).toHaveBeenCalledWith({
       ...data,
       price: PriceConverter.toRepository(data.price!),
-      updatedAt: now,
+      now,
     });
     expect(spies.planRepository.update).toHaveBeenCalledWith(expect.any(Plan));
 

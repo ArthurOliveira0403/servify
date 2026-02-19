@@ -40,7 +40,7 @@ export class UpdateServiceUseCase {
       name: data.name,
       description: data.description,
       basePrice,
-      updatedAt: this.dateTrasnformService.nowUTC(),
+      now: this.dateTrasnformService.nowUTC(),
     });
 
     await this.serviceRepository.update(service);

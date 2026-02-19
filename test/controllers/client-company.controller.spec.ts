@@ -18,7 +18,7 @@ import { ListClientsCompanyUseCase } from 'src/application/use-cases/list-client
 import { ClientCompanyWithClientDTO } from 'src/application/dtos/shared/client-company-with-client.dto';
 import { SubscriptionModule } from 'src/infra/modules/subscription.module';
 import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 
 const createClientCompanyUseCaseMock = {
   provide: CreateClientCompanyUseCase,
@@ -46,6 +46,7 @@ const clientMock1 = new Client({
   id: 'client-1',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany1 = new ClientCompany({
@@ -54,12 +55,15 @@ const clientCompany1 = new ClientCompany({
   companyId: 'company-123',
   email: 'email@email.com',
   phone: '1234567890',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 const clientMock2 = new Client({
   id: 'client-2',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany2 = new ClientCompany({
@@ -68,12 +72,15 @@ const clientCompany2 = new ClientCompany({
   companyId: 'company-123',
   email: 'email2@email.com',
   phone: '0987654321',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 const clientMock3 = new Client({
   id: 'client-3',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany3 = new ClientCompany({
@@ -82,6 +89,8 @@ const clientCompany3 = new ClientCompany({
   companyId: 'company-123',
   email: 'newEmail@email.com',
   phone: '123456',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 describe('ClientCompanyController', () => {
@@ -246,6 +255,7 @@ describe('ClientCompanyController', () => {
       id: 'client-0',
       fullName: 'John Doe',
       internationalId: '123456',
+      createdAt: new Date(),
     });
 
     const clientCompanyUpdated = new ClientCompany({
@@ -254,6 +264,8 @@ describe('ClientCompanyController', () => {
       companyId: user.id,
       email: dataToUpdate.email,
       phone: dataToUpdate.phone,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     spies.updateClientCompanyUseCase.handle.mockResolvedValue({

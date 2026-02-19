@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import { PlanException } from '../exceptions/plan.exception';
 
 export type PlanType = 'MONTHLY' | 'YEARLY';
 
-abstract class PlanProps {
+type PlanProps = {
   id?: string;
   name: string;
   type: PlanType;
@@ -11,20 +12,20 @@ abstract class PlanProps {
   serviceExecutionsLimit: number;
   clientCompanysLimit: number;
   invoicesLimit: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-abstract class UpdateProps {
+type UpdateProps = {
   name?: string;
   type?: PlanType;
   price?: number;
   servicesLimit?: number;
   serviceExecutionsLimit?: number;
   clientCompanysLimit?: number;
-  invoiceLimit?: number;
-  updatedAt: Date;
-}
+  invoicesLimit?: number;
+  now: Date;
+};
 
 export class Plan {
   private readonly _id: string;
@@ -39,6 +40,8 @@ export class Plan {
   private _updatedAt: Date;
 
   constructor(props: PlanProps) {
+    this.validateCreate(props);
+
     this._id = props.id ?? randomUUID();
     this._name = props.name;
     this._type = props.type;
@@ -47,11 +50,13 @@ export class Plan {
     this._serviceExecutionsLimit = props.serviceExecutionsLimit;
     this._clientCompanysLimit = props.clientCompanysLimit;
     this._invoicesLimit = props.invoicesLimit;
-    this._createdAt = props.createdAt ?? new Date();
-    this._updatedAt = props.updatedAt ?? new Date();
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
   public update(props: UpdateProps) {
+    this.validateUpdate(props);
+
     this._name = props.name ?? this.name;
     this._type = props.type ?? this.type;
     this._price = props.price ?? this.price;
@@ -60,8 +65,49 @@ export class Plan {
       props.serviceExecutionsLimit ?? this.serviceExecutionsLimit;
     this._clientCompanysLimit =
       props.clientCompanysLimit ?? this.clientCompanysLimit;
-    this._invoicesLimit = props.invoiceLimit ?? this.invoicesLimit;
-    this._updatedAt = props.updatedAt;
+    this._invoicesLimit = props.invoicesLimit ?? this.invoicesLimit;
+    this._updatedAt = props.now;
+  }
+
+  private validateCreate(props: PlanProps) {
+    if (props.name.length < 2 || props.name.length > 30)
+      throw new PlanException('Name very small or very large');
+
+    if (props.price < 0) throw new PlanException('Price cannot be negative');
+
+    if (props.servicesLimit < 0)
+      throw new PlanException('Services limit cannot be negative');
+
+    if (props.serviceExecutionsLimit < 0)
+      throw new PlanException('Service execution limit cannot be negative');
+
+    if (props.clientCompanysLimit < 0)
+      throw new PlanException('Clients company cannot be negative');
+
+    if (props.invoicesLimit < 0)
+      throw new PlanException('Invoices limit cannot be negative');
+  }
+
+  private validateUpdate(props: UpdateProps) {
+    if (props.name)
+      if (props.name.length < 2 || props.name.length > 30)
+        throw new PlanException('Name very small or very large');
+
+    if (props.price !== undefined)
+      if (props.price < 0) throw new PlanException('Price cannot be negative');
+
+    if (props.servicesLimit !== undefined)
+      if (props.servicesLimit < 0)
+        throw new PlanException('Services limit cannot be negative');
+    if (props.serviceExecutionsLimit !== undefined)
+      if (props.serviceExecutionsLimit < 0)
+        throw new PlanException('Service execution limit cannot be negative');
+    if (props.clientCompanysLimit !== undefined)
+      if (props.clientCompanysLimit < 0)
+        throw new PlanException('Clients company cannot be negative');
+    if (props.invoicesLimit !== undefined)
+      if (props.invoicesLimit < 0)
+        throw new PlanException('Invoices limit cannot be negative');
   }
 
   get id() {

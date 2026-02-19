@@ -64,6 +64,8 @@ describe('PlanController', () => {
     serviceExecutionsLimit: 15,
     clientCompanysLimit: 15,
     invoicesLimit: 15,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const plan2 = new Plan({
@@ -75,6 +77,8 @@ describe('PlanController', () => {
     serviceExecutionsLimit: 10,
     clientCompanysLimit: 10,
     invoicesLimit: 10,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const plan3 = new Plan({
@@ -86,6 +90,8 @@ describe('PlanController', () => {
     serviceExecutionsLimit: 5,
     clientCompanysLimit: 5,
     invoicesLimit: 5,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeAll(async () => {
@@ -210,6 +216,8 @@ describe('PlanController', () => {
       serviceExecutionsLimit: 15,
       clientCompanysLimit: 15,
       invoicesLimit: 15,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     spies.updatePlanUseCase.handle.mockResolvedValue({ plan: planUpdated });

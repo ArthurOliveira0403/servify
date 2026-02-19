@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import * as bcrypt from 'bcrypt';
-import { SeedException } from 'src/infra/exceptions/seed.exception';
+import { SeedException } from '../../exceptions/seed.exception';
 
 const prisma = new PrismaClient();
 const logger = new Logger();
@@ -15,12 +15,24 @@ async function main() {
       'ADMIN_EMAIL not exist',
       `Run seed in: ${main.name}`,
     );
+  if (!ADMIN_EMAIL.includes('@'))
+    throw new SeedException(
+      'ADMIN_EMAIL is invalid',
+      'ADMIN_EMAIL is invalid',
+      `Run seed in: ${main.name}`,
+    );
 
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
   if (!ADMIN_PASSWORD)
     throw new SeedException(
       'ADMIN_PASSWORD not exist',
       'ADMIN_PASSWORD not exist',
+      `Run seed in: ${main.name}`,
+    );
+  if (ADMIN_PASSWORD.length < 4 || ADMIN_PASSWORD.length > 20)
+    throw new SeedException(
+      'ADMIN_EMAIL is very small or very large',
+      'ADMIN_EMAIL is very small or very large',
       `Run seed in: ${main.name}`,
     );
 

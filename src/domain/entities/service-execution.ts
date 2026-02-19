@@ -1,8 +1,9 @@
 import { randomUUID } from 'crypto';
+import { serviceExecutionException } from '../exceptions/service-execution.exception';
 
 export type ServiceExecutionStatus = 'PENDING' | 'DONE' | 'CANCELED';
 
-interface ServiceExecutionProps {
+type ServiceExecutionProps = {
   id?: string;
   companyId: string;
   serviceId: string;
@@ -10,17 +11,18 @@ interface ServiceExecutionProps {
   executedAt: Date;
   price: number; // cents
   status?: ServiceExecutionStatus;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-interface UpdateDetailsProps {
+type UpdateDetailsProps = {
   serviceId?: string;
   clientCompanyId?: string;
   executedAt?: Date;
   price?: number;
   status?: ServiceExecutionStatus;
-}
+  now: Date;
+};
 
 export class ServiceExecution {
   private readonly _id: string;
@@ -34,6 +36,8 @@ export class ServiceExecution {
   private _updatedAt: Date;
 
   constructor(props: ServiceExecutionProps) {
+    this.validateCreate(props);
+
     this._id = props.id ?? randomUUID();
     this._companyId = props.companyId;
     this._serviceId = props.serviceId;
@@ -41,14 +45,28 @@ export class ServiceExecution {
     this._executedAt = props.executedAt;
     this._price = props.price;
     this._status = props.status ?? 'PENDING';
-    this._createdAt = props.createdAt ?? new Date();
-    this._updatedAt = props.updatedAt ?? new Date();
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
   updateDetails(props: UpdateDetailsProps) {
+    this.validateUpdate(props);
+
     this._executedAt = props.executedAt ?? this.executedAt;
     this._price = props.price ?? this.price;
     this._status = props.status ?? this.status;
+    this._updatedAt = props.now;
+  }
+
+  private validateCreate(props: ServiceExecutionProps) {
+    if (props.price < 0)
+      throw new serviceExecutionException('Price cannot be negative');
+  }
+
+  private validateUpdate(props: UpdateDetailsProps) {
+    if (props.price !== undefined)
+      if (props.price < 0)
+        throw new serviceExecutionException('Price cannot be negative');
   }
 
   get id() {

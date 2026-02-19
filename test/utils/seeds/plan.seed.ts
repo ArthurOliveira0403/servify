@@ -10,6 +10,8 @@ export async function planSeed(
   try {
     const plan = new Plan({
       ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const raw = PrismaPlanMapper.toPrisma(plan);

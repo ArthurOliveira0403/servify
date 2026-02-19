@@ -32,8 +32,6 @@ export class PrismaCompanyRepository implements CompanyRepository {
 
     const companyFound = new Company({
       ...company,
-      name: company.name,
-      cnpj: company.cnpj,
       address: company.address
         ? new Address({ ...company.address, company_id: company.id })
         : undefined,
@@ -59,6 +57,8 @@ export class PrismaCompanyRepository implements CompanyRepository {
               }),
           )
         : [],
+      createdAt: company.created_at,
+      updatedAt: company.updated_at,
     });
 
     return companyFound;
@@ -74,8 +74,6 @@ export class PrismaCompanyRepository implements CompanyRepository {
 
     const companyFound = new Company({
       ...company,
-      name: company.name,
-      cnpj: company.cnpj,
       address: company.address
         ? new Address({ ...company.address, company_id: company.id })
         : undefined,
@@ -101,6 +99,8 @@ export class PrismaCompanyRepository implements CompanyRepository {
               }),
           )
         : [],
+      createdAt: company.created_at,
+      updatedAt: company.updated_at,
     });
 
     return companyFound;

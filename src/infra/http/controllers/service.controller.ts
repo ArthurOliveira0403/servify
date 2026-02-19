@@ -30,7 +30,7 @@ import {
 } from 'src/infra/schemas/delete-service.schemas';
 import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 
 @Controller('service')
 export class ServiceController {

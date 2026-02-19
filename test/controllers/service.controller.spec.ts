@@ -11,7 +11,7 @@ import { ServiceController } from 'src/infra/http/controllers/service.controller
 import { ServiceReponseMapper } from 'src/infra/http/mappers/service-response.mapper';
 import { SubscriptionModule } from 'src/infra/modules/subscription.module';
 import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { UpdateServiceBodyDTO } from 'src/infra/schemas/update-service.schemas';
 
 const createServiceUseCaseMock = {
@@ -72,6 +72,8 @@ describe('ServiceController', () => {
     name: 'Service',
     description: 'A complete Service',
     basePrice: 2345.67,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const serviceMock2 = new Service({
@@ -79,6 +81,8 @@ describe('ServiceController', () => {
     name: 'Tire repair',
     description: 'A complete tire repair',
     basePrice: 69.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const serviceMock3 = new Service({
@@ -86,6 +90,8 @@ describe('ServiceController', () => {
     name: 'Oil change',
     description: 'A complete car repair',
     basePrice: 200.15,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeAll(async () => {
@@ -176,6 +182,8 @@ describe('ServiceController', () => {
       name: dataToUpdate.name!,
       description: dataToUpdate.description!,
       basePrice: dataToUpdate.basePrice!,
+      createdAt: serviceMock1.createdAt,
+      updatedAt: serviceMock1.updatedAt,
     });
 
     spies.updateServiceUseCase.handle.mockResolvedValue({

@@ -25,6 +25,8 @@ describe('UpdateServiceUseCase', () => {
     companyId,
     description: 'A service',
     basePrice: 99.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const data: UpdateServiceDTO = {
@@ -74,7 +76,7 @@ describe('UpdateServiceUseCase', () => {
     expect(spies.service.update).toHaveBeenCalledWith({
       description: data.description,
       basePrice: data.basePrice! * 100,
-      updatedAt: fakeNowUTC,
+      now: fakeNowUTC,
     });
     expect(spies.serviceRepository.update).toHaveBeenCalledWith(
       expect.any(Service),

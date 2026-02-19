@@ -29,7 +29,7 @@ import {
 import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';
 import { Roles } from 'src/infra/decorators/roles.decorator';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 
 @Roles('COMPANY')
 @Controller('client-company')

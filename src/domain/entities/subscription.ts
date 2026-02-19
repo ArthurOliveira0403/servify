@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { SubscriptionException } from './exceptions/subscription-exception';
 import { PlanType } from './plan';
+import { SubscriptionException } from '../exceptions/subscription.exception';
 
 export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED';
 export enum Feature {
@@ -10,7 +10,7 @@ export enum Feature {
   INVOICE = 'INVOICE',
 }
 
-abstract class SubscriptionProps {
+type SubscriptionProps = {
   id?: string;
   companyId: string;
   planId: string;
@@ -28,7 +28,7 @@ abstract class SubscriptionProps {
   autoRenew?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-}
+};
 
 export class Subscription {
   private _id: string;
@@ -53,8 +53,6 @@ export class Subscription {
     if (props.endDate <= props.startDate)
       throw new SubscriptionException(
         'The endDate is smaller than the startDate',
-        'Invalid subscription period',
-        Subscription.name,
       );
 
     this._id = props.id ?? randomUUID();
@@ -80,9 +78,7 @@ export class Subscription {
     const active = this.isActive(now);
     if (!active)
       throw new SubscriptionException(
-        'Can not use anything feature because this subscription is expired',
-        'Expired Subscription',
-        Subscription.name,
+        'Cannot use any feature by expired subscription',
       );
 
     const limit = this.limit(feature);
@@ -90,8 +86,6 @@ export class Subscription {
     if (limit <= currentCount)
       throw new SubscriptionException(
         `The ${feature} limit of ${this.id} subcription reached`,
-        `${feature} limit reached`,
-        Subscription.name,
       );
   }
 
@@ -122,23 +116,17 @@ export class Subscription {
   renew(newEndDate: Date, now: Date) {
     if (!this.autoRenew)
       throw new SubscriptionException(
-        'Subscription is not set to auto renew',
-        'Auto renew subscription disable',
-        Subscription.name,
+        'Cannot renew when the autoRenew is false',
       );
 
     if (newEndDate <= this.endDate)
       throw new SubscriptionException(
         'The new endDate is smaller than the old endDate',
-        'Invalid subscription endDate',
-        Subscription.name,
       );
 
     if (newEndDate <= now)
       throw new SubscriptionException(
         'The newEndDate is smaller than the nowDate',
-        'Invalid new subscription period',
-        Subscription.name,
       );
 
     this._status = 'ACTIVE';
@@ -152,16 +140,10 @@ export class Subscription {
     if (this.status !== 'ACTIVE')
       throw new SubscriptionException(
         'Only active subscriptions can be canceled',
-        'Only active subscriptions can be canceled',
-        Subscription.name,
       );
 
     if (!this.autoRenew)
-      throw new SubscriptionException(
-        'Already subscription canceled',
-        'Already subscription canceled',
-        Subscription.name,
-      );
+      throw new SubscriptionException('Already subscription canceled');
 
     this._autoRenew = false;
     this._updatedAt = now;

@@ -26,7 +26,7 @@ export class UpdateCompanyUseCase {
     const company = await this.companyRepository.findById(id);
     if (!company) throw new NotFoundException('Company not found');
 
-    company.update({ ...data, updatedAt: this.dateTrasformService.nowUTC() });
+    company.update({ ...data, now: this.dateTrasformService.nowUTC() });
 
     await this.companyRepository.update(company);
 

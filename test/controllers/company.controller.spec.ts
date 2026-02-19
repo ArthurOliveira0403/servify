@@ -4,7 +4,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DATE_TRANSFORM_SERVICE } from 'src/application/services/date-transform.service';
 import { UpdateCompanyUseCase } from 'src/application/use-cases/update-company.use-case';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { Address } from 'src/domain/entities/address';
 import { Company } from 'src/domain/entities/company';
 import { CompanyController } from 'src/infra/http/controllers/company.controller';
@@ -28,6 +28,8 @@ describe('companyController', () => {
     email: 'luminnus@email.com',
     password: '123456',
     phoneNumber: '084 9 9999-9999',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const data: UpdateCompanyBodyDTO = {
@@ -78,6 +80,8 @@ describe('companyController', () => {
         state: data.address?.state,
       }),
       phoneNumber: data.phoneNumber,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     spies.updateCompanyUseCase.handle.mockResolvedValue({

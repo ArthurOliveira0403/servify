@@ -44,7 +44,7 @@ export class UpdateClientCompanyUseCase {
     clientCompany.updateDetails({
       email: data.email,
       phone: data.phone,
-      updatedAt: this.dateTransformService.nowUTC(),
+      now: this.dateTransformService.nowUTC(),
     });
 
     await this.clientCompanyRepository.update(clientCompany);

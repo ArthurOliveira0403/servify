@@ -23,6 +23,7 @@ describe('UpdateClientCompanyUseCase', () => {
     id: 'client-1',
     fullName: 'john Doe',
     internationalId: '12324',
+    createdAt: new Date(),
   });
 
   const clientCompanyMock = new ClientCompany({
@@ -31,6 +32,8 @@ describe('UpdateClientCompanyUseCase', () => {
     companyId: 'company-1',
     email: 'john@example.com',
     phone: '1234567890',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const data: UpdateClientCompanyDTO = {
@@ -85,7 +88,7 @@ describe('UpdateClientCompanyUseCase', () => {
     expect(spies.clientCompany.updateDetails).toHaveBeenCalledWith({
       email: data.email,
       phone: data.phone,
-      updatedAt: fakeNowUTC,
+      now: fakeNowUTC,
     });
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.clientCompanyRepository.update).toHaveBeenCalled();
@@ -134,7 +137,7 @@ describe('UpdateClientCompanyUseCase', () => {
     expect(spies.clientCompany.updateDetails).toHaveBeenCalledWith({
       email: data.email,
       phone: data.phone,
-      updatedAt: fakeNowUTC,
+      now: fakeNowUTC,
     });
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.clientCompanyRepository.update).toHaveBeenCalled();

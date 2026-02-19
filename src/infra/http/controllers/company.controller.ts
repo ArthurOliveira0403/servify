@@ -7,7 +7,7 @@ import {
 import { Zod } from 'src/infra/decorators/zod.decorator';
 import { CompanyResponseMapper } from '../mappers/company-response.mapper';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { Roles } from 'src/infra/decorators/roles.decorator';
 
 @Roles('COMPANY')

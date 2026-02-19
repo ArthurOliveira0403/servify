@@ -24,6 +24,7 @@ export async function clientCompanySeed(
     const client = new Client({
       fullName: data.fullName,
       internationalId: data.internationalId,
+      createdAt: new Date(),
     });
 
     const clientRaw = PrismaClientMapper.toPrisma(client);
@@ -33,6 +34,8 @@ export async function clientCompanySeed(
       clientId: client.id,
       email: data.email,
       phone: data.phone,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const clientCompanyRaw = PrismaClientCompanyMapper.toPrisma(clientCompany);

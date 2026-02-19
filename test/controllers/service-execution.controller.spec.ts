@@ -3,7 +3,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { ServiceExecutionController } from 'src/infra/http/controllers/service-execution.controller';
 import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
 import { SubscriptionModule } from 'src/infra/modules/subscription.module';

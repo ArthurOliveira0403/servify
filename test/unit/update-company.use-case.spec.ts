@@ -22,6 +22,8 @@ describe('UpdateCompanyUseCase', () => {
     cnpj: '1234567',
     email: 'luminnus@email.com',
     password: 'hashedPassword',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const companyMockWithAddress = new Company({
@@ -36,6 +38,8 @@ describe('UpdateCompanyUseCase', () => {
       state: 'Rio de janeiro',
       number: '12',
     }),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const data: UpdateCompanyDTO = {
@@ -87,7 +91,7 @@ describe('UpdateCompanyUseCase', () => {
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.companyWithAddress.update).toHaveBeenCalledWith({
       ...data,
-      updatedAt: fakeNowUTC,
+      now: fakeNowUTC,
     });
     expect(spies.repository.update).toHaveBeenCalledWith(expect.any(Company));
 
@@ -109,7 +113,7 @@ describe('UpdateCompanyUseCase', () => {
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.company.update).toHaveBeenCalledWith({
       ...data,
-      updatedAt: fakeNowUTC,
+      now: fakeNowUTC,
     });
     expect(spies.repository.update).toHaveBeenCalledWith(expect.any(Company));
 

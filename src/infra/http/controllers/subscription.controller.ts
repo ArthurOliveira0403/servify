@@ -14,7 +14,7 @@ import {
 } from 'src/infra/schemas/cancel-subscription.schemas';
 import { SubscriptionResponseMapper } from '../mappers/subscription-response.mapper';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 
 @Controller('subscription')
 export class SubscriptionController {

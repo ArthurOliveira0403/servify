@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import { CurrentUser } from 'src/infra/decorators/current-user.decorator';
 import { Zod } from 'src/infra/decorators/zod.decorator';
 import { SubscriptionGuard } from 'src/infra/guards/subscription.guard';

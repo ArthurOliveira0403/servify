@@ -1,21 +1,22 @@
 import { randomUUID } from 'node:crypto';
+import { ServiceException } from '../exceptions/service.exception';
 
-interface ServiceProps {
+type ServiceProps = {
   id?: string;
   companyId: string;
   name: string;
   description: string;
   basePrice: number; // cents
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-interface UpdateServiceProps {
+type UpdateServiceProps = {
   name?: string;
   description?: string;
-  basePrice?: number;
-  updatedAt: Date;
-}
+  basePrice?: number; // cents
+  now: Date;
+};
 
 export class Service {
   private readonly _id: string;
@@ -27,6 +28,8 @@ export class Service {
   private _updatedAt: Date;
 
   constructor(props: ServiceProps) {
+    this.validateCreate(props);
+
     this._id = props.id ?? randomUUID();
     this._companyId = props.companyId;
     this._name = props.name;
@@ -37,9 +40,36 @@ export class Service {
   }
 
   public update(props: UpdateServiceProps) {
+    this.validateUpdate(props);
+
     this._description = props.description ?? this.description;
     this._basePrice = props.basePrice ?? this.basePrice;
-    this._updatedAt = props.updatedAt;
+    this._updatedAt = props.now;
+  }
+
+  private validateCreate(props: ServiceProps) {
+    if (props.name.length < 2 || props.name.length > 50)
+      throw new ServiceException('Name very small or very large');
+
+    if (props.description.length < 2)
+      throw new ServiceException('Description very small');
+
+    if (props.basePrice < 0)
+      throw new ServiceException('Base price cannot be negative');
+  }
+
+  private validateUpdate(props: UpdateServiceProps) {
+    if (props.name)
+      if (props.name.length < 2 || props.name.length > 50)
+        throw new ServiceException('Name very small or very large');
+
+    if (props.description)
+      if (props.description.length < 2)
+        throw new ServiceException('Description very small');
+
+    if (props.basePrice !== undefined)
+      if (props.basePrice < 0)
+        throw new ServiceException('Base price cannot be negative');
   }
 
   get id() {

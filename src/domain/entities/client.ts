@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
+import { ClientException } from '../exceptions/client.exception';
 
-interface ClientProps {
+type ClientProps = {
   id?: string;
   fullName: string;
   internationalId: string;
-  createdAt?: Date;
-}
+  createdAt: Date;
+};
 
 export class Client {
   private readonly _id: string;
@@ -14,10 +15,17 @@ export class Client {
   private _createdAt: Date;
 
   constructor(props: ClientProps) {
+    this.validateProps(props);
+
     this._id = props.id ?? randomUUID();
     this._fullName = props.fullName;
     this._internationalId = props.internationalId;
-    this._createdAt = props.createdAt ?? new Date();
+    this._createdAt = props.createdAt;
+  }
+
+  private validateProps(props: ClientProps) {
+    if (props.fullName.length < 2 || props.fullName.length > 100)
+      throw new ClientException('Name vary small or very large');
   }
 
   get id() {

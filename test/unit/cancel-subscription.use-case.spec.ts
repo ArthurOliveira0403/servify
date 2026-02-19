@@ -3,8 +3,8 @@ import { CancelSubscriptionDTO } from 'src/application/dtos/cancel-subscription.
 import { NotFoundException } from 'src/application/exceptions/not-found.exception';
 import { UnauthorizedException } from 'src/application/exceptions/unauthorized.exception';
 import { CancelSubscriptionUseCase } from 'src/application/use-cases/cancel-subscription.use-case';
-import { SubscriptionException } from 'src/domain/entities/exceptions/subscription-exception';
 import { Subscription } from 'src/domain/entities/subscription';
+import { SubscriptionException } from 'src/domain/exceptions/subscription.exception';
 import { SubscriptionRepository } from 'src/domain/repositories/subscription.repository';
 import { InMemorySubscriptionRepository } from 'test/utils/in-memory/in-memory.subscription-repository';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';

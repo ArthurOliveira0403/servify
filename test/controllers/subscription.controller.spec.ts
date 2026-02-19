@@ -10,7 +10,7 @@ import { ListActiveSubscriptionUseCase } from 'src/application/use-cases/list-ac
 import { SubscriptionController } from 'src/infra/http/controllers/subscription.controller';
 import { SubscriptionResponseMapper } from 'src/infra/http/mappers/subscription-response.mapper';
 import { UnauthorizedException } from 'src/application/exceptions/unauthorized.exception';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 
 const createSubscriptionUseCaseMock = {
   provide: CreateSusbcriptionUseCase,

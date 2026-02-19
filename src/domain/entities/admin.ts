@@ -1,10 +1,12 @@
+import { randomUUID } from 'node:crypto';
 import { UserRole } from '../common/user-role';
+import { AdminException } from '../exceptions/admin.exception';
 
-interface AdminProps {
-  id: string;
+type AdminProps = {
+  id?: string;
   email: string;
   password: string;
-}
+};
 
 export class Admin {
   private readonly _id: string;
@@ -13,10 +15,18 @@ export class Admin {
   private readonly _role: UserRole;
 
   constructor(props: AdminProps) {
-    this._id = props.id;
+    this.validateProps(props);
+
+    this._id = props.id ?? randomUUID();
     this._email = props.email;
     this._password = props.password;
     this._role = 'ADMIN';
+  }
+
+  private validateProps(props: AdminProps) {
+    if (!props.email.includes('@')) throw new AdminException('Invalid email');
+    if (props.password.length < 4 || props.password.length > 100)
+      throw new AdminException('Password very small or very large');
   }
 
   get id() {

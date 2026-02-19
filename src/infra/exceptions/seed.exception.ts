@@ -1,4 +1,4 @@
-import { Exception } from 'src/shared/exception';
+import { Exception } from '../../shared/exception';
 
 export class SeedException extends Exception {
   constructor(

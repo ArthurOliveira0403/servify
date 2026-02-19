@@ -2,8 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { Address } from './address';
 import { Subscription } from 'src/domain/entities/subscription';
 import { UserRole } from '../common/user-role';
+import { CompanyException } from '../exceptions/company.exception';
 
-interface CompanyProps {
+type CompanyProps = {
   id?: string;
   name: string;
   email: string;
@@ -12,16 +13,16 @@ interface CompanyProps {
   address?: Address;
   phoneNumber?: string;
   subscriptions?: Subscription[];
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-interface CompanyUpdateProps {
+type CompanyDetailsProps = {
   name?: string;
   address?: Partial<Address>;
   phoneNumber?: string;
-  updatedAt: Date;
-}
+  now: Date;
+};
 
 export class Company {
   private readonly _role: UserRole;
@@ -37,6 +38,8 @@ export class Company {
   private _updatedAt: Date;
 
   constructor(props: CompanyProps) {
+    this.validateCreate(props);
+
     this._role = 'COMPANY';
     this._id = props.id ?? randomUUID();
     this._name = props.name;
@@ -46,21 +49,37 @@ export class Company {
     this._address = props.address ?? null;
     this._phoneNumber = props.phoneNumber ?? null;
     this._subscriptions = props.subscriptions ?? [];
-    this._createdAt = props.createdAt ?? new Date();
-    this._updatedAt = props.updatedAt ?? new Date();
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
-  public update(data: CompanyUpdateProps) {
-    if (data.name !== undefined) this._name = data.name;
-    if (data.phoneNumber !== undefined) this._phoneNumber = data.phoneNumber;
-    if (data.address) {
+  public update(props: CompanyDetailsProps) {
+    this.validateUpdate(props);
+
+    if (props.name !== undefined) this._name = props.name;
+    if (props.phoneNumber !== undefined) this._phoneNumber = props.phoneNumber;
+    if (props.address) {
       if (this._address) {
-        this._address.update(data.address);
+        this._address.update(props.address);
       } else {
-        this._address = new Address({ company_id: this._id, ...data.address });
+        this._address = new Address({ company_id: this._id, ...props.address });
       }
     }
-    this._updatedAt = data.updatedAt;
+    this._updatedAt = props.now;
+  }
+
+  private validateCreate(props: CompanyProps) {
+    if (props.name.length < 2 || props.name.length > 100)
+      throw new CompanyException('Name very smal or very large');
+    if (props.password.length < 4 || props.password.length > 100)
+      throw new CompanyException('Password very small or very lage');
+    if (!props.email.includes('@')) throw new CompanyException('Invalid email');
+  }
+
+  private validateUpdate(props: CompanyDetailsProps) {
+    if (props.name !== undefined)
+      if (props.name.length < 2 || props.name.length > 100)
+        throw new CompanyException('Name very smal or very large');
   }
 
   get id() {

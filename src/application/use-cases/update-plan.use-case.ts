@@ -30,7 +30,7 @@ export class UpdatePlanUseCase {
     planExist.update({
       ...data,
       price: data.price ? PriceConverter.toRepository(data.price) : undefined,
-      updatedAt: this.dateTransformService.nowUTC(),
+      now: this.dateTransformService.nowUTC(),
     });
 
     await this.planRepository.update(planExist);

@@ -21,6 +21,8 @@ export async function serviceSeed(
     const service = new Service({
       ...data,
       companyId: company.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const raw = PrismaServiceMapper.toPrisma(service);

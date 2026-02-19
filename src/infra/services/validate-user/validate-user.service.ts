@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthUser } from 'src/domain/common/auth-user.interface';
+import { AuthUser } from 'src/application/common/auth-user.interface';
 import {
   IValidateUserService,
   ValidaterUserServiceDTO,

@@ -32,7 +32,7 @@ export class GenerateInvoicePdfUseCase {
     @Inject(INVOICE_PDF_STORAGE_SERVICE)
     private invoicePdfStorageService: InvoicePdfStorageService,
     @Inject(DATE_TRANSFORM_SERVICE)
-    private dateTransform: DateTransformService,
+    private dateTransformService: DateTransformService,
   ) {}
 
   async handle(data: GenerateInvoicePdfDTO): Promise<Buffer> {
@@ -63,12 +63,12 @@ export class GenerateInvoicePdfUseCase {
       serviceName: invoice.serviceName,
       serviceDescription: invoice.serviceDescription,
       price: PriceConverter.toResponse(invoice.price),
-      executedAt: this.dateTransform.formatInTimezoneWithoutHour(
+      executedAt: this.dateTransformService.formatInTimezoneWithoutHour(
         invoice.executedAt,
         invoice.timezone,
       ),
       invoiceNumber: invoice.invoiceNumber,
-      issuedAt: this.dateTransform.formatInTimezoneWithoutHour(
+      issuedAt: this.dateTransformService.formatInTimezoneWithoutHour(
         invoice.issuedAt,
         invoice.timezone,
       ),
@@ -95,7 +95,7 @@ export class GenerateInvoicePdfUseCase {
     invoice: Invoice,
     pdfPath: string,
   ): Promise<void> {
-    invoice.update(pdfPath);
+    invoice.updatePdfPath(pdfPath, this.dateTransformService.nowUTC());
 
     await this.invoiceRepository.update(invoice);
   }
