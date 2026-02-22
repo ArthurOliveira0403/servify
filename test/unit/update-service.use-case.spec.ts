@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PriceConverter } from 'src/application/common/price-converter.common';
 import { UpdateServiceDTO } from 'src/application/dtos/update-service.dto';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { DateTransformService } from 'src/application/services/date-transform.service';
 import { UpdateServiceUseCase } from 'src/application/use-cases/update-service.use-case';
 import { Service } from 'src/domain/entities/service';
@@ -87,26 +88,26 @@ describe('UpdateServiceUseCase', () => {
     expect(response.service.updatedAt).toBe(fakeNowUTC);
   });
 
-  it('should throw a NotFoundException when serviceId is invalid', async () => {
+  it('should throw a EntityNotFoundException when serviceId is invalid', async () => {
     await repository.save(serviceMock);
 
     const fakeId = '123456';
 
     await expect(
       useCase.handle({ ...data, serviceId: fakeId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.serviceRepository.findById).toHaveBeenCalledWith(fakeId);
   });
 
-  it('should throw a ForbiddenException when service belong not the company', async () => {
+  it('should throw a NonBelongingException when service belong not the company', async () => {
     await repository.save(serviceMock);
 
     const fakeCompanyId = '123456';
 
     await expect(
       useCase.handle({ ...data, companyId: fakeCompanyId }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.serviceRepository.findById).toHaveBeenCalledWith(serviceId);
   });

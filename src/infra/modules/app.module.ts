@@ -14,11 +14,12 @@ import { ServiceExecutionModule } from './service-execution.module';
 import { InvoiceModule } from './invoice.module';
 import { PdfModule } from './pdf.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { FeatureCounterModule } from './feature-counter.module';
 import { ValidateUserModule } from './validate-user.module';
+import { GlobalExceptionFilter } from '../filters/global-exception.filter';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ValidateUserModule } from './validate-user.module';
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
   ],
 })
 export class AppModule {}

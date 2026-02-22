@@ -8,7 +8,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { PlanType } from 'src/domain/entities/plan';
-import { NotFoundException } from '../exceptions/not-found.exception';
+import { RegisterNotException } from '../exceptions/register-not.exception';
 
 @Injectable()
 export class ProcessSubscriptionsRenewalsUseCase {
@@ -49,9 +49,8 @@ export class ProcessSubscriptionsRenewalsUseCase {
       case 'YEARLY':
         return this.dateTransformService.addYears(start, 1);
       default:
-        throw new NotFoundException(
-          'The plan type is not register in useCase',
-          'Invalid Plan type',
+        throw new RegisterNotException(
+          'Non-registed Plan type in useCase',
           ProcessSubscriptionsRenewalsUseCase.name,
         );
     }

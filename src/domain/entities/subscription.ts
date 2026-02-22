@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { PlanType } from './plan';
 import { SubscriptionException } from '../exceptions/subscription.exception';
+import { ExpiredSubscriptionException } from '../exceptions/expired-subscripton';
+import { SubscriptonLimitReachedException } from '../exceptions/subscription-limit-reached.exception';
 
 export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED';
 export enum Feature {
@@ -52,7 +54,9 @@ export class Subscription {
   constructor(props: SubscriptionProps) {
     if (props.endDate <= props.startDate)
       throw new SubscriptionException(
-        'The endDate is smaller than the startDate',
+        'Invalid endDate on processing Subscription entity',
+        'Invalid period of Subscription',
+        Subscription.name,
       );
 
     this._id = props.id ?? randomUUID();
@@ -77,15 +81,19 @@ export class Subscription {
   assertCanUseFeature(feature: Feature, currentCount: number, now: Date) {
     const active = this.isActive(now);
     if (!active)
-      throw new SubscriptionException(
+      throw new ExpiredSubscriptionException(
+        `Cannot assertCanUseFeature of subscription of id: ${this.id}, because she is not active`,
         'Cannot use any feature by expired subscription',
+        Subscription.name,
       );
 
     const limit = this.limit(feature);
 
     if (limit <= currentCount)
-      throw new SubscriptionException(
-        `The ${feature} limit of ${this.id} subcription reached`,
+      throw new SubscriptonLimitReachedException(
+        `The ${feature} limit of subcription of id: ${this.id} reached`,
+        'Feature limit reached',
+        Subscription.name,
       );
   }
 
@@ -116,17 +124,23 @@ export class Subscription {
   renew(newEndDate: Date, now: Date) {
     if (!this.autoRenew)
       throw new SubscriptionException(
-        'Cannot renew when the autoRenew is false',
+        `Cannot be processing renew of subscription id: ${this.id}, because the autoRenew is "false"`,
+        'Cannot renew a "CANCELED" Subscipriton',
+        Subscription.name,
       );
 
     if (newEndDate <= this.endDate)
       throw new SubscriptionException(
+        '',
         'The new endDate is smaller than the old endDate',
+        Subscription.name,
       );
 
     if (newEndDate <= now)
       throw new SubscriptionException(
-        'The newEndDate is smaller than the nowDate',
+        'Invalid new endDate on processing Subscription entity',
+        'Invalid period of Subscription',
+        Subscription.name,
       );
 
     this._status = 'ACTIVE';
@@ -139,11 +153,17 @@ export class Subscription {
   cancelAtPeriodEnd(now: Date) {
     if (this.status !== 'ACTIVE')
       throw new SubscriptionException(
+        `Cannot be processing Subscripton cancellation of id: ${this.id}, because the status is not "ACTIVE"`,
         'Only active subscriptions can be canceled',
+        Subscription.name,
       );
 
     if (!this.autoRenew)
-      throw new SubscriptionException('Already subscription canceled');
+      throw new SubscriptionException(
+        `Cannot be processing Subscripton cancellation of id: ${this.id}, because she already canceled`,
+        'Already subscription canceled',
+        Subscription.name,
+      );
 
     this._autoRenew = false;
     this._updatedAt = now;

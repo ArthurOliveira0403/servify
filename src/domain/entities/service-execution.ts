@@ -60,13 +60,21 @@ export class ServiceExecution {
 
   private validateCreate(props: ServiceExecutionProps) {
     if (props.price < 0)
-      throw new serviceExecutionException('Price cannot be negative');
+      throw new serviceExecutionException(
+        'Invalid Price on processing Plan entity',
+        'Price cannot be negative',
+        ServiceExecution.name,
+      );
   }
 
   private validateUpdate(props: UpdateDetailsProps) {
     if (props.price !== undefined)
       if (props.price < 0)
-        throw new serviceExecutionException('Price cannot be negative');
+        throw new serviceExecutionException(
+          'Invalid Price on processing Plan entity',
+          'Price cannot be negative',
+          ServiceExecution.name,
+        );
   }
 
   get id() {

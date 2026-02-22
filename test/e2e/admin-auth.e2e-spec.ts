@@ -1,9 +1,11 @@
+import { APP_FILTER } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 import { AdminAuthModule } from 'src/infra/modules/admin-auth.module';
 import { SignInAdminBodyDTO } from 'src/infra/schemas/sign-in-admin.schemas';
 import { PrismaService } from 'src/infra/services/prisma/prisma.service';
@@ -19,6 +21,7 @@ describe('AdminAuth (e2e)', () => {
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AdminAuthModule],
+      providers: [{ provide: APP_FILTER, useClass: GlobalExceptionFilter }],
     }).compile();
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(
@@ -53,17 +56,17 @@ describe('AdminAuth (e2e)', () => {
   });
 
   // Corrigir quando colocar o  filterException
-  it('should return status 500 when send incorrect email', async () => {
+  it('should return status 404 when send incorrect email', async () => {
     await request(app.getHttpServer())
       .post('/s_admin/auth')
       .send({ ...adminCreateData, email: 'fakeEmail@email.com' })
-      .expect(500);
+      .expect(404);
   });
 
-  it('should return status 500 when send incorrect password', async () => {
+  it('should return status 403 when send incorrect password', async () => {
     await request(app.getHttpServer())
       .post('/s_admin/auth')
       .send({ ...adminCreateData, password: 'fakePassword' })
-      .expect(500);
+      .expect(403);
   });
 });

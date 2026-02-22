@@ -7,7 +7,8 @@ import {
   HASHER_SERVICE,
   type HasherService,
 } from '../services/password-hasher.service';
-import { ForbiddenException } from '../exceptions/forbidden.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
 
 export class SignInAdminUseCase {
   constructor(
@@ -23,16 +24,16 @@ export class SignInAdminUseCase {
     const adminExist = await this.adminRepository.findByEmail(data.email);
 
     if (!adminExist)
-      throw new ForbiddenException(
+      throw new EntityNotFoundException(
         `Admin with ${data.email} email not found`,
-        'Email not found',
+        'Admin not found',
         SignInAdminUseCase.name,
       );
 
     if (!(await this.hasherService.compare(data.password, adminExist.password)))
-      throw new ForbiddenException(
-        `The request password not match with admin password`,
-        'Incorrect email or password',
+      throw new InvalidCredentialsException(
+        'Incorrect password',
+        'Incorrect password',
         SignInAdminUseCase.name,
       );
 

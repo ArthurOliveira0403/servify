@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { CompanyRepository } from 'src/domain/repositories/company.repository';
 import { COMPANY_REPOSITORY } from 'src/domain/repositories/company.repository';
 import { SignInDTO } from '../dtos/sign-in.dto';
@@ -12,6 +7,8 @@ import {
   HASHER_SERVICE,
   type HasherService,
 } from '../services/password-hasher.service';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
 
 @Injectable()
 export class SignInUseCase {
@@ -26,7 +23,12 @@ export class SignInUseCase {
   async handle(data: SignInDTO): Promise<string> {
     const company = await this.companyRepository.findByEmail(data.email);
 
-    if (!company) throw new NotFoundException('Company not found');
+    if (!company)
+      throw new EntityNotFoundException(
+        `Company of email: ${data.email} not found`,
+        'Company not found',
+        SignInUseCase.name,
+      );
 
     const isMatch = await this.passwordHasher.compare(
       data.password,
@@ -34,7 +36,11 @@ export class SignInUseCase {
     );
 
     if (!isMatch)
-      throw new UnauthorizedException('Email or password incorrects');
+      throw new InvalidCredentialsException(
+        'Incorrect password',
+        'Incorrect password',
+        SignInUseCase.name,
+      );
 
     const accessToken = this.tokenService.sign({
       sub: company.id,

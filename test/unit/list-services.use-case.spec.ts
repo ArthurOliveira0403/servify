@@ -16,6 +16,8 @@ describe('ListServicesUseCase', () => {
     name: 'Service',
     description: 'A service',
     basePrice: 200,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const serviceMock2 = new Service({
@@ -23,6 +25,8 @@ describe('ListServicesUseCase', () => {
     name: 'Full Service',
     description: 'A service',
     basePrice: 99.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const serviceMock3 = new Service({
@@ -30,6 +34,8 @@ describe('ListServicesUseCase', () => {
     name: 'Simple Service',
     description: 'A service',
     basePrice: 159.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeEach(async () => {

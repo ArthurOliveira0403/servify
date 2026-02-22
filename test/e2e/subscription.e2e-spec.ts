@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -18,6 +18,7 @@ import { PrismaService } from 'src/infra/services/prisma/prisma.service';
 import { singUpAndLogin } from 'test/utils/helpers/sign-up-and-login.helper';
 import request from 'supertest';
 import { planSeed } from 'test/utils/seeds/plan.seed';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 
 describe('Subscription (e2e)', () => {
   let app: NestFastifyApplication;
@@ -40,6 +41,7 @@ describe('Subscription (e2e)', () => {
           provide: APP_GUARD,
           useClass: RolesGuard,
         },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 
@@ -92,8 +94,7 @@ describe('Subscription (e2e)', () => {
     expect(response.body).toHaveProperty('subscriptionId');
   });
 
-  // Corrigir Após FilterException
-  it('/subscription/:planId (POST) - should return 500 when already exist an active subscrition', async () => {
+  it('/subscription/:planId (POST) - should return 409 when already exist an active subscrition', async () => {
     await request(app.getHttpServer())
       .post(`/subscription/${planId}`)
       .set('Authorization', `Bearer ${token}`)
@@ -102,7 +103,7 @@ describe('Subscription (e2e)', () => {
     await request(app.getHttpServer())
       .post(`/subscription/${planId}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500);
+      .expect(409);
   });
 
   // ==================== List Active ====================
@@ -148,18 +149,16 @@ describe('Subscription (e2e)', () => {
     );
   });
 
-  // Corrigi Após FilterExceptions
-  it('/subscription/:id (DELETE) - should return return 500 when the subscription not exist', async () => {
+  it('/subscription/:id (DELETE) - should return return 404 when the subscription not exist', async () => {
     const fakeSubscriptionId = '1234567';
 
     await request(app.getHttpServer())
       .delete(`/subscription/${fakeSubscriptionId}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500);
+      .expect(404);
   });
 
-  // Corrigi Após FilterExceptions
-  it('/subscription/:id (DELETE) - should return return 500 when the subscription not belong to the company', async () => {
+  it('/subscription/:id (DELETE) - should return return 403 when the subscription not belong to the company', async () => {
     const otherCompanyToken = await singUpAndLogin(app, {
       name: 'otherName',
       cnpj: 'otherCnpj',
@@ -177,6 +176,6 @@ describe('Subscription (e2e)', () => {
     await request(app.getHttpServer())
       .delete(`/subscription/${subscriptionId}`)
       .set('Authorization', `Bearer ${otherCompanyToken}`)
-      .expect(500);
+      .expect(403);
   });
 });

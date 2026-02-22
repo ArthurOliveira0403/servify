@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   CLIENT_COMPANY_REPOSITORY,
   type ClientCompanyRepository,
@@ -19,6 +19,7 @@ import {
   SUBSCRIPTION_POLICY_SERVICE,
   type ISubscriptionPolicyService,
 } from '../services/isubcription-policy.service';
+import { AlreadyExistException } from '../exceptions/already-exist.exception';
 
 @Injectable()
 export class CreateClientCompanyUseCase {
@@ -52,8 +53,10 @@ export class CreateClientCompanyUseCase {
     );
 
     if (relationExists)
-      throw new ConflictException(
-        'The relation between the company and the client it already exists',
+      throw new AlreadyExistException(
+        `The ClientCompany already exist`,
+        'The clientCompany already exist',
+        CreateClientCompanyUseCase.name,
       );
 
     const clientCompany = new ClientCompany({

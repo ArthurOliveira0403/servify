@@ -4,12 +4,12 @@ import {
   type SubscriptionRepository,
 } from 'src/domain/repositories/subscription.repository';
 import { CancelSubscriptionDTO } from '../dtos/cancel-subscription.dto';
-import { NotFoundException } from '../exceptions/not-found.exception';
 import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
-import { UnauthorizedException } from '../exceptions/unauthorized.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
 
 @Injectable()
 export class CancelSubscriptionUseCase {
@@ -25,16 +25,16 @@ export class CancelSubscriptionUseCase {
       data.subscriptionId,
     );
     if (!subscription)
-      throw new NotFoundException(
+      throw new EntityNotFoundException(
+        `The Subscripton of id: ${data.subscriptionId} not found`,
         'Subscription not found',
-        'Subscription was not found',
         CancelSubscriptionUseCase.name,
       );
 
     if (data.companyId !== subscription.companyId)
-      throw new UnauthorizedException(
-        'The companyId user not match with the subscription companyId',
-        'The Subscription not belong to the company',
+      throw new NonBelongingException(
+        `The Subscripton of id: ${subscription.id} does not belong the company of id: ${data.companyId}`,
+        'The subscription does not belong to the company',
         CancelSubscriptionUseCase.name,
       );
 

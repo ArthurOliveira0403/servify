@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IFeatureCounterService } from 'src/application/services/ifeature-counter.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Feature } from 'src/domain/entities/subscription';
-import { FeatureCounterException } from '../../exceptions/feature-counter.exception';
+import { FeatureNotFoundException } from 'src/infra/exceptions/feature-not-found.exception';
 
 @Injectable()
 export class FeatureCounterService implements IFeatureCounterService {
@@ -27,9 +27,8 @@ export class FeatureCounterService implements IFeatureCounterService {
           where: { company_id: companyId },
         });
       default:
-        throw new FeatureCounterException(
-          'Feature type not register',
-          'Invalid feature type',
+        throw new FeatureNotFoundException(
+          'Feature type not register in FeatureCounterService',
           FeatureCounterService.name,
         );
     }

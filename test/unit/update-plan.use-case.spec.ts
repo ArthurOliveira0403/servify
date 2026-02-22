@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { PriceConverter } from 'src/application/common/price-converter.common';
 import { UpdatePlanDTO } from 'src/application/dtos/update-plan.dto';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 import { UpdatePlanUseCase } from 'src/application/use-cases/update-plan.use-case';
 import { Plan } from 'src/domain/entities/plan';
 import { PlanRepository } from 'src/domain/repositories/plan.repository';
@@ -72,12 +72,12 @@ describe('UpdatePlanUseCase', () => {
     expect(plan.price).toBe(PriceConverter.toRepository(data.price!));
   });
 
-  it('should throw a NotFoundException when the plan not exist', async () => {
+  it('should throw a EntityNotFoundException when the plan not exist', async () => {
     const fakePlanId = '123456789';
 
     await expect(
       useCase.handle({ ...data, planId: fakePlanId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.planRepository.findById).toHaveBeenCalledWith(fakePlanId);
   });

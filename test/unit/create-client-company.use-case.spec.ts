@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ConflictException } from '@nestjs/common';
 import { CreateClientCompanyDTO } from 'src/application/dtos/create-client-company.dto';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
 import { CreateClientCompanyUseCase } from 'src/application/use-cases/create-client-company.use-case';
 import { Client } from 'src/domain/entities/client';
 import { ClientCompany } from 'src/domain/entities/client-company';
@@ -99,6 +99,7 @@ describe('CreateClientCompanyUseCase', () => {
     const clientMock = new Client({
       fullName: 'Fulano',
       internationalId: '1234567890334567890',
+      createdAt: new Date(),
     });
 
     await clientRepository.save(clientMock);
@@ -137,11 +138,12 @@ describe('CreateClientCompanyUseCase', () => {
     expect(response.clientCompanyId).toBe(clientCompanyId);
   });
 
-  it('should throw ConflictException if relationship already exists', async () => {
+  it('should throw AlreadyExistException if relationship already exists', async () => {
     const clientMock = new Client({
       id: '1',
       internationalId: '123',
       fullName: 'Client Name',
+      createdAt: new Date(),
     });
 
     const clientCompanyMock = new ClientCompany({
@@ -149,6 +151,8 @@ describe('CreateClientCompanyUseCase', () => {
       companyId: data.companyId,
       email: data.email,
       phone: data.phone,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     await clientRepository.save(clientMock);
@@ -156,7 +160,7 @@ describe('CreateClientCompanyUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, internationalId: clientMock.internationalId }),
-    ).rejects.toThrow(ConflictException);
+    ).rejects.toThrow(AlreadyExistException);
 
     expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
       data.companyId,

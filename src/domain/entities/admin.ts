@@ -24,9 +24,18 @@ export class Admin {
   }
 
   private validateProps(props: AdminProps) {
-    if (!props.email.includes('@')) throw new AdminException('Invalid email');
+    if (!props.email.includes('@'))
+      throw new AdminException(
+        'Invalid Email on processing admin entity',
+        'Invalid email',
+        Admin.name,
+      );
     if (props.password.length < 4 || props.password.length > 100)
-      throw new AdminException('Password very small or very large');
+      throw new AdminException(
+        'Invalid password on processing admin entity',
+        'Password very small or very large',
+        Admin.name,
+      );
   }
 
   get id() {

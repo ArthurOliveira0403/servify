@@ -4,6 +4,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthUser } from 'src/application/common/auth-user.interface';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { ForbiddenException } from '../exceptions/forbidden.exception';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,6 +23,15 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    return requiredRoles.includes(user.role);
+    const canAccess = requiredRoles.includes(user.role);
+
+    if (!canAccess)
+      throw new ForbiddenException(
+        `The user ${user.id} has not the required roles for access`,
+        'Cannot be access this method',
+        RolesGuard.name,
+      );
+
+    return true;
   }
 }

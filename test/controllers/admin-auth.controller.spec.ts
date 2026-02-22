@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from 'src/application/exceptions/forbidden.exception';
+import { InvalidCredentialsException } from 'src/application/exceptions/invalid-credentials.exception';
 import { SignInAdminUseCase } from 'src/application/use-cases/sign-in-admin.use-case';
 import { AdminAuthController } from 'src/infra/http/controllers/admin-auth.controller';
 import { SignInAdminBodyDTO } from 'src/infra/schemas/sign-in-admin.schemas';
@@ -54,32 +54,32 @@ describe('AdminAuthController', () => {
     expect(response.accessToken).toBe(accessToken);
   });
 
-  it('should throw a ForbiddenException when the email is invalid', async () => {
+  it('should throw a InvalidCredentialsException when the email is invalid', async () => {
     spies.singInAdminUseCase.handle.mockRejectedValue(
-      new ForbiddenException('', '', ''),
+      new InvalidCredentialsException('', '', ''),
     );
 
     const fakeEmail = 'fakeEmail';
 
     await expect(
       controller.signUp({ ...data, email: fakeEmail }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(InvalidCredentialsException);
     expect(spies.singInAdminUseCase.handle).toHaveBeenCalledWith({
       ...data,
       email: fakeEmail,
     });
   });
 
-  it('should throw a ForbiddenException when the password is invalid', async () => {
+  it('should throw a InvalidCredentialsException when the password is invalid', async () => {
     spies.singInAdminUseCase.handle.mockRejectedValue(
-      new ForbiddenException('', '', ''),
+      new InvalidCredentialsException('', '', ''),
     );
 
     const fakePassword = 'fakePassword';
 
     await expect(
       controller.signUp({ ...data, password: fakePassword }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(InvalidCredentialsException);
     expect(spies.singInAdminUseCase.handle).toHaveBeenCalledWith({
       ...data,
       password: fakePassword,

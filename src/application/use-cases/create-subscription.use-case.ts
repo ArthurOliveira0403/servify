@@ -10,8 +10,9 @@ import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
-import { ConflictException } from '../exceptions/conflict.exception';
-import { NotFoundException } from '../exceptions/not-found.exception';
+import { AlreadyExistException } from '../exceptions/already-exist.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { RegisterNotException } from '../exceptions/register-not.exception';
 
 @Injectable()
 export class CreateSusbcriptionUseCase {
@@ -32,17 +33,17 @@ export class CreateSusbcriptionUseCase {
         data.companyId,
       );
     if (subscriptionExist)
-      throw new ConflictException(
-        'There is already an active subscription',
+      throw new AlreadyExistException(
+        `The company of id: ${data.companyId} already have an active subscription`,
         'There is already an active subscription',
         CreateSusbcriptionUseCase.name,
       );
 
     const plan = await this.planRepository.findById(data.planId);
     if (!plan)
-      throw new NotFoundException(
+      throw new EntityNotFoundException(
+        `Plan of id: ${data.planId} not found`,
         'Plan not found',
-        'This Plan was not found',
         CreateSusbcriptionUseCase.name,
       );
 
@@ -80,9 +81,8 @@ export class CreateSusbcriptionUseCase {
       case 'YEARLY':
         return this.dateTrasnformService.addYears(start, 1);
       default:
-        throw new NotFoundException(
-          'The plan type is not register in useCase',
-          'Invalid Plan type',
+        throw new RegisterNotException(
+          `Non-registed plan type`,
           CreateSusbcriptionUseCase.name,
         );
     }

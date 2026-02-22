@@ -8,7 +8,7 @@ import { AuthModule } from 'src/infra/modules/auth.module';
 import { ServiceExecutionModule } from 'src/infra/modules/service-execution.module';
 import { singUpAndLogin } from 'test/utils/helpers/sign-up-and-login.helper';
 import { SignUpBodyDTO } from 'src/infra/schemas/sign-up.schemas';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'src/infra/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/infra/guards/roles.guard';
 import { CreatePlanBodyDTO } from 'src/infra/schemas/create-plan.schemas';
@@ -18,6 +18,7 @@ import request from 'supertest';
 import { serviceSeed } from 'test/utils/seeds/service.seed';
 import { clientCompanySeed } from 'test/utils/seeds/client-company.seed';
 import { CreateServiceExecutionBodyDTO } from 'src/infra/schemas/create-service-execution.schemas';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 
 describe('ServiceExecution (e2e)', () => {
   let app: NestFastifyApplication;
@@ -49,6 +50,7 @@ describe('ServiceExecution (e2e)', () => {
           provide: APP_GUARD,
           useClass: RolesGuard,
         },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 
@@ -201,7 +203,6 @@ describe('ServiceExecution (e2e)', () => {
       .expect(403);
   });
 
-  // Corrigir Após FilterExceptions
   it('/service-execution (POST) - should return 403 when the company reached subcription service executions limit', async () => {
     await request(app.getHttpServer())
       .post('/service-execution')
@@ -225,11 +226,16 @@ describe('ServiceExecution (e2e)', () => {
       .post('/service-execution')
       .set('Authorization', `Bearer ${token}`)
       .send(dataToCreate)
-      .expect(500);
+      .expect(403);
   });
 
   it('/service-execution (POST) - should return 403 when the have not an active subscripion', async () => {
-    const otherTokenCompany = await singUpAndLogin(app, otherCompanyData);
+    const otherTokenCompany = await singUpAndLogin(app, {
+      name: 'Lumin',
+      email: `${randomUUID()}@email.com`,
+      cnpj: `${randomUUID()}`,
+      password: '123456',
+    });
 
     await request(app.getHttpServer())
       .post('/service-execution')

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateClientCompanyDTO } from 'src/application/dtos/update-client-company.dto';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { DateTransformService } from 'src/application/services/date-transform.service';
 import { UpdateClientCompanyUseCase } from 'src/application/use-cases/update-client-company.use-case';
 import { Client } from 'src/domain/entities/client';
@@ -104,8 +105,8 @@ describe('UpdateClientCompanyUseCase', () => {
     expect(response.clientCompany.updatedAt).toBe(fakeNowUTC);
   });
 
-  it('should throw NotFoundException if client-company relation does not exist', async () => {
-    await expect(useCase.handle(data)).rejects.toThrow(NotFoundException);
+  it('should throw EntityNotFoundException if client-company relation does not exist', async () => {
+    await expect(useCase.handle(data)).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.clientCompanyRepository.findById).toHaveBeenCalledWith(
       data.clientCompanyId,
@@ -113,12 +114,12 @@ describe('UpdateClientCompanyUseCase', () => {
     expect(spies.clientCompanyRepository.update).not.toHaveBeenCalled();
   });
 
-  it('should throw UnauthorizedException if companyId does not match', async () => {
+  it('should throw NonBelongingException if companyId does not match', async () => {
     const invalidData = { ...data, companyId: 'invalid-company-id' };
     await repository.save(clientCompanyMock);
 
     await expect(useCase.handle(invalidData)).rejects.toThrow(
-      UnauthorizedException,
+      NonBelongingException,
     );
     expect(spies.clientCompanyRepository.findById).toHaveBeenCalledWith(
       data.clientCompanyId,
@@ -126,10 +127,10 @@ describe('UpdateClientCompanyUseCase', () => {
     expect(spies.clientCompanyRepository.update).not.toHaveBeenCalled();
   });
 
-  it('should throw NotFoundException when the Client of ClientCompany does not exists', async () => {
+  it('should throw EntityNotFoundException when the Client of ClientCompany does not exists', async () => {
     await repository.save(clientCompanyMock);
 
-    await expect(useCase.handle(data)).rejects.toThrow(NotFoundException);
+    await expect(useCase.handle(data)).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.clientCompanyRepository.findById).toHaveBeenCalledWith(
       data.clientCompanyId,

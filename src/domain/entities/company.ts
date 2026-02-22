@@ -70,16 +70,33 @@ export class Company {
 
   private validateCreate(props: CompanyProps) {
     if (props.name.length < 2 || props.name.length > 100)
-      throw new CompanyException('Name very smal or very large');
+      throw new CompanyException(
+        'Invalid name on processing Company entity',
+        'Name very smal or very large',
+        Company.name,
+      );
     if (props.password.length < 4 || props.password.length > 100)
-      throw new CompanyException('Password very small or very lage');
-    if (!props.email.includes('@')) throw new CompanyException('Invalid email');
+      throw new CompanyException(
+        'Invalid Password on processing Company entity',
+        'Password very small or very lage',
+        Company.name,
+      );
+    if (!props.email.includes('@'))
+      throw new CompanyException(
+        'Invalid Email on processing Company entity',
+        'Invalid email',
+        Company.name,
+      );
   }
 
   private validateUpdate(props: CompanyDetailsProps) {
     if (props.name !== undefined)
       if (props.name.length < 2 || props.name.length > 100)
-        throw new CompanyException('Name very smal or very large');
+        throw new CompanyException(
+          'Invalid name on processing Company entity',
+          'Name very smal or very large',
+          Company.name,
+        );
   }
 
   get id() {

@@ -10,7 +10,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { PriceConverter } from '../common/price-converter.common';
-import { ConflictException } from '../exceptions/conflict.exception';
+import { AlreadyExistException } from '../exceptions/already-exist.exception';
 
 @Injectable()
 export class CreatePlanUseCase {
@@ -25,9 +25,9 @@ export class CreatePlanUseCase {
     const existPlan = await this.planRepository.findByName(data.name);
 
     if (existPlan)
-      throw new ConflictException(
+      throw new AlreadyExistException(
         `The Plan with "${data.name}" name already exist`,
-        'The Plan with this name already exist',
+        'Plan already exist',
         CreatePlanUseCase.name,
       );
 

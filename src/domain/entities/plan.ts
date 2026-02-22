@@ -71,43 +71,96 @@ export class Plan {
 
   private validateCreate(props: PlanProps) {
     if (props.name.length < 2 || props.name.length > 30)
-      throw new PlanException('Name very small or very large');
+      throw new PlanException(
+        'Invalid name on processing Company entity',
+        'Name very smal or very large',
+        Plan.name,
+      );
 
-    if (props.price < 0) throw new PlanException('Price cannot be negative');
+    if (props.price < 0)
+      throw new PlanException(
+        'Invalid Price on processing Plan entity',
+        'Price cannot be negative',
+        Plan.name,
+      );
 
     if (props.servicesLimit < 0)
-      throw new PlanException('Services limit cannot be negative');
+      throw new PlanException(
+        'Invalid Services Limit on processing Plan entity',
+        'Services limit cannot be negative',
+        Plan.name,
+      );
 
     if (props.serviceExecutionsLimit < 0)
-      throw new PlanException('Service execution limit cannot be negative');
+      throw new PlanException(
+        'Invalid Service Executions Limit on processing Plan entity',
+        'Service execution limit cannot be negative',
+        Plan.name,
+      );
 
     if (props.clientCompanysLimit < 0)
-      throw new PlanException('Clients company cannot be negative');
+      throw new PlanException(
+        'Invalid Clients Company Limit on processing Plan entity',
+        'Clients company cannot be negative',
+        Plan.name,
+      );
 
     if (props.invoicesLimit < 0)
-      throw new PlanException('Invoices limit cannot be negative');
+      throw new PlanException(
+        'Invalid Invoices Limit on processing Plan entity',
+        'Invoices limit cannot be negative',
+        Plan.name,
+      );
   }
 
   private validateUpdate(props: UpdateProps) {
     if (props.name)
       if (props.name.length < 2 || props.name.length > 30)
-        throw new PlanException('Name very small or very large');
+        throw new PlanException(
+          'Invalid name on processing Company entity',
+          'Name very smal or very large',
+          Plan.name,
+        );
 
     if (props.price !== undefined)
-      if (props.price < 0) throw new PlanException('Price cannot be negative');
+      if (props.price < 0)
+        throw new PlanException(
+          'Invalid Price on processing Plan entity',
+          'Price cannot be negative',
+          Plan.name,
+        );
 
     if (props.servicesLimit !== undefined)
       if (props.servicesLimit < 0)
-        throw new PlanException('Services limit cannot be negative');
+        throw new PlanException(
+          'Invalid Services Limit on processing Plan entity',
+          'Services limit cannot be negative',
+          Plan.name,
+        );
+
     if (props.serviceExecutionsLimit !== undefined)
       if (props.serviceExecutionsLimit < 0)
-        throw new PlanException('Service execution limit cannot be negative');
+        throw new PlanException(
+          'Invalid Service Executions Limit on processing Plan entity',
+          'Service execution limit cannot be negative',
+          Plan.name,
+        );
+
     if (props.clientCompanysLimit !== undefined)
       if (props.clientCompanysLimit < 0)
-        throw new PlanException('Clients company cannot be negative');
+        throw new PlanException(
+          'Invalid Clients Company Limit on processing Plan entity',
+          'Clients company cannot be negative',
+          Plan.name,
+        );
+
     if (props.invoicesLimit !== undefined)
       if (props.invoicesLimit < 0)
-        throw new PlanException('Invoices limit cannot be negative');
+        throw new PlanException(
+          'Invalid Invoices Limit on processing Plan entity',
+          'Invoices limit cannot be negative',
+          Plan.name,
+        );
   }
 
   get id() {

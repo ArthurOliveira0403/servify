@@ -15,12 +15,13 @@ import { SignUpBodyDTO } from 'src/infra/schemas/sign-up.schemas';
 import { singUpAndLogin } from 'test/utils/helpers/sign-up-and-login.helper';
 import { UpdatePlanBodyDTO } from 'src/infra/schemas/update-plan.schemas';
 import { PlanModule } from 'src/infra/modules/plan.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'src/infra/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/infra/guards/roles.guard';
 import { ValidateUserModule } from 'src/infra/modules/validate-user.module';
 import { AdminAuthModule } from 'src/infra/modules/admin-auth.module';
 import { AuthModule } from 'src/infra/modules/auth.module';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 
 describe('Plan (e2e)', () => {
   let app: NestFastifyApplication;
@@ -49,6 +50,7 @@ describe('Plan (e2e)', () => {
       providers: [
         { provide: APP_GUARD, useClass: JwtAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 
@@ -117,7 +119,6 @@ describe('Plan (e2e)', () => {
     expect(response.body).toHaveProperty('planId');
   });
 
-  // Corrigir após FilterExceptions
   it('/plan (POST) - should return 500 when try create a already exist plan with this name', async () => {
     await request(app.getHttpServer())
       .post('/plan')
@@ -129,7 +130,7 @@ describe('Plan (e2e)', () => {
       .post('/plan')
       .send(dataToCreate)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500);
+      .expect(409);
   });
 
   it('/plan (POST) - should return 403 statuCode when some company try create a plan', async () => {
@@ -160,8 +161,7 @@ describe('Plan (e2e)', () => {
     expect(getResponse.body).toHaveProperty('plan');
   });
 
-  // Corrigir após FilterExceptions
-  it('/plan/:id (GET) - should return 500 when the plan not exist', async () => {
+  it('/plan/:id (GET) - should return 404 when the plan not exist', async () => {
     await request(app.getHttpServer())
       .post('/plan')
       .send(dataToCreate)
@@ -173,7 +173,7 @@ describe('Plan (e2e)', () => {
     await request(app.getHttpServer())
       .get(`/plan/${fakePlanId}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500);
+      .expect(404);
   });
 
   it('/plan/:id (GET) - should return 403 statuCode when some company try list one plan', async () => {
@@ -270,7 +270,7 @@ describe('Plan (e2e)', () => {
   });
 
   // Corrigi após FilterExceptions
-  it('/plan/:id (PATCH) - should return 500 when the plan not exist', async () => {
+  it('/plan/:id (PATCH) - should return 404 when the plan not exist', async () => {
     const fakePlanId = '1234567865432134567865433';
 
     await request(app.getHttpServer())
@@ -283,7 +283,7 @@ describe('Plan (e2e)', () => {
       .patch(`/plan/${fakePlanId}`)
       .send(dataToUpdate)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500);
+      .expect(404);
   });
 
   it('/plan/:id (PATCH) - should return 403 when some company try update a plan', async () => {

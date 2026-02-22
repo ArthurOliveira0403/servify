@@ -49,27 +49,51 @@ export class Service {
 
   private validateCreate(props: ServiceProps) {
     if (props.name.length < 2 || props.name.length > 50)
-      throw new ServiceException('Name very small or very large');
+      throw new ServiceException(
+        'Invalid Name on processing Service entity',
+        'Name very small or very large',
+        Service.name,
+      );
 
     if (props.description.length < 2)
-      throw new ServiceException('Description very small');
+      throw new ServiceException(
+        'Invalid Email on processing Service Entity',
+        'Description very small',
+        Service.name,
+      );
 
     if (props.basePrice < 0)
-      throw new ServiceException('Base price cannot be negative');
+      throw new ServiceException(
+        'Invalid Price on processing Service Entity',
+        'Base price cannot be negative',
+        Service.name,
+      );
   }
 
   private validateUpdate(props: UpdateServiceProps) {
     if (props.name)
       if (props.name.length < 2 || props.name.length > 50)
-        throw new ServiceException('Name very small or very large');
+        throw new ServiceException(
+          'Invalid Name on processing Service entity',
+          'Name very small or very large',
+          Service.name,
+        );
 
     if (props.description)
       if (props.description.length < 2)
-        throw new ServiceException('Description very small');
+        throw new ServiceException(
+          'Invalid Email on processing Service Entity',
+          'Description very small',
+          Service.name,
+        );
 
     if (props.basePrice !== undefined)
       if (props.basePrice < 0)
-        throw new ServiceException('Base price cannot be negative');
+        throw new ServiceException(
+          'Invalid Price on processing Service Entity',
+          'Base price cannot be negative',
+          Service.name,
+        );
   }
 
   get id() {

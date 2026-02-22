@@ -1,10 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateClientCompanyUseCase } from 'src/application/use-cases/create-client-company.use-case';
 import { UpdateClientCompanyUseCase } from 'src/application/use-cases/update-client-company.use-case';
@@ -19,6 +14,9 @@ import { ClientCompanyWithClientDTO } from 'src/application/dtos/shared/client-c
 import { SubscriptionModule } from 'src/infra/modules/subscription.module';
 import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
 import { AuthUser } from 'src/application/common/auth-user.interface';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 
 const createClientCompanyUseCaseMock = {
   provide: CreateClientCompanyUseCase,
@@ -194,12 +192,12 @@ describe('ClientCompanyController', () => {
     expect(response.clientCompanyId).toBe(responseUseCase.clientCompanyId);
   });
 
-  it('should throw ConflictException when creating a client company with existing relation', async () => {
+  it('should throw AlreadyExistException when creating a client company with existing relation', async () => {
     spies.createClientCompanyUseCase.handle.mockRejectedValue(
-      new ConflictException(),
+      new AlreadyExistException('', '', ''),
     );
     await expect(controller.create(user, dataToCreate)).rejects.toThrow(
-      ConflictException,
+      AlreadyExistException,
     );
   });
 
@@ -293,14 +291,14 @@ describe('ClientCompanyController', () => {
     );
   });
 
-  it('should throw NotFoundException when updating a non-existing client company', async () => {
+  it('should throw EntityNotFoundException when updating a non-existing client company', async () => {
     spies.updateClientCompanyUseCase.handle.mockRejectedValue(
-      new NotFoundException(),
+      new EntityNotFoundException('', '', ''),
     );
 
     await expect(
       controller.update(user, clientCompanyId, dataToUpdate),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.updateClientCompanyUseCase.handle).toHaveBeenCalledWith({
       ...dataToUpdate,
@@ -309,14 +307,14 @@ describe('ClientCompanyController', () => {
     });
   });
 
-  it('should throw UnauthorizedException when updating a client company not belonging to the company', async () => {
+  it('should throw NonBelongingException when updating a client company not belonging to the company', async () => {
     spies.updateClientCompanyUseCase.handle.mockRejectedValue(
-      new UnauthorizedException(),
+      new NonBelongingException('', '', ''),
     );
 
     await expect(
       controller.update(user, clientCompanyId, dataToUpdate),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.updateClientCompanyUseCase.handle).toHaveBeenCalledWith({
       ...dataToUpdate,

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { PriceConverter } from 'src/application/common/price-converter.common';
 import { CreatePlanDTO } from 'src/application/dtos/create-plan.dto';
-import { ConflictException } from 'src/application/exceptions/conflict.exception';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
 import { CreatePlanUseCase } from 'src/application/use-cases/create-plan.use-case';
 import { Plan } from 'src/domain/entities/plan';
 import { PlanRepository } from 'src/domain/repositories/plan.repository';
@@ -61,12 +61,12 @@ describe('CreatePlanUseCase', () => {
     expect(plan.invoicesLimit).toBe(data.invoicesLimit);
   });
 
-  it('should throw ConflictException when already exists a plan with the name', async () => {
+  it('should throw AlreadyExistException when already exists a plan with the name', async () => {
     await useCase.handle(data);
 
     await expect(
       useCase.handle({ ...data, price: 299.99, type: 'YEARLY' }),
-    ).rejects.toThrow(ConflictException);
+    ).rejects.toThrow(AlreadyExistException);
 
     expect(spies.planRepository.findByName).toHaveBeenCalledWith(data.name);
   });

@@ -82,7 +82,11 @@ export class Invoice {
 
   cancel(now: Date) {
     if (this.status === 'INVALID')
-      throw new InvoiceException('Cannot cancel a invalid invoice');
+      throw new InvoiceException(
+        `Cannot cancel the subscription of id: ${this.id}, because she is "INVALID"`,
+        'Cannot cancel a invalid invoice',
+        Invoice.name,
+      );
 
     this._status = 'INVALID';
     this._updatedAt = now;

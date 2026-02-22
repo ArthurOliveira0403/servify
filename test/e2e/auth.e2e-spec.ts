@@ -8,6 +8,8 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
+import { APP_FILTER } from '@nestjs/core';
 
 describe('Auth (e2e)', () => {
   let app: NestFastifyApplication;
@@ -22,6 +24,7 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AuthModule],
+      providers: [{ provide: APP_FILTER, useClass: GlobalExceptionFilter }],
     }).compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
@@ -49,7 +52,7 @@ describe('Auth (e2e)', () => {
     await request(app.getHttpServer())
       .post('/auth/signup')
       .send(data)
-      .expect(401);
+      .expect(409);
   });
 
   // Sign In
@@ -88,6 +91,6 @@ describe('Auth (e2e)', () => {
         email: data.email,
         password: '33333',
       })
-      .expect(401);
+      .expect(403);
   });
 });

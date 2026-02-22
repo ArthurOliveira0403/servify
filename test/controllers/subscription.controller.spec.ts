@@ -2,15 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Test, TestingModule } from '@nestjs/testing';
 import { Subscription } from 'src/domain/entities/subscription';
-import { ConflictException } from 'src/application/exceptions/conflict.exception';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
 import { CancelSubscriptionUseCase } from 'src/application/use-cases/cancel-subscription.use-case';
 import { CreateSusbcriptionUseCase } from 'src/application/use-cases/create-subscription.use-case';
 import { ListActiveSubscriptionUseCase } from 'src/application/use-cases/list-active-subscription.use-case';
 import { SubscriptionController } from 'src/infra/http/controllers/subscription.controller';
 import { SubscriptionResponseMapper } from 'src/infra/http/mappers/subscription-response.mapper';
-import { UnauthorizedException } from 'src/application/exceptions/unauthorized.exception';
 import { AuthUser } from 'src/application/common/auth-user.interface';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
+import { UserNotFoundException } from 'src/infra/exceptions/user-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 
 const createSubscriptionUseCaseMock = {
   provide: CreateSusbcriptionUseCase,
@@ -130,13 +130,13 @@ describe('SubscriptionController', () => {
     expect(response.subscriptionId).toBe(subscriptionId);
   });
 
-  it('should throw ConflictException when already exists an active Subscription', async () => {
+  it('should throw AlreadyExistException when already exists an active Subscription', async () => {
     spies.createSubscriptionUseCase.handle.mockRejectedValue(
-      new ConflictException('', '', ''),
+      new AlreadyExistException('', '', ''),
     );
 
     await expect(controller.create(user, planId)).rejects.toThrow(
-      ConflictException,
+      AlreadyExistException,
     );
     expect(spies.createSubscriptionUseCase.handle).toHaveBeenCalledWith({
       companyId: user.id,
@@ -144,13 +144,13 @@ describe('SubscriptionController', () => {
     });
   });
 
-  it('should throw NotFoundException when the plan not exist or the plan type does not register in Usecase', async () => {
+  it('should throw UserNotFoundException when the plan not exist or the plan type does not register in Usecase', async () => {
     spies.createSubscriptionUseCase.handle.mockRejectedValue(
-      new NotFoundException('', '', ''),
+      new UserNotFoundException('', ''),
     );
 
     await expect(controller.create(user, planId)).rejects.toThrow(
-      NotFoundException,
+      UserNotFoundException,
     );
     expect(spies.createSubscriptionUseCase.handle).toHaveBeenCalledWith({
       companyId: user.id,
@@ -203,13 +203,13 @@ describe('SubscriptionController', () => {
     expect(response.message).toBe('Successfully subscription canceled');
   });
 
-  it('should throw a NotFoundException when the subscription not exist', async () => {
+  it('should throw a UserNotFoundException when the subscription not exist', async () => {
     spies.cancelSubscriptionUseCase.handle.mockRejectedValue(
-      new NotFoundException('', '', ''),
+      new UserNotFoundException('', ''),
     );
 
     await expect(controller.cancel(user, subscriptionId)).rejects.toThrow(
-      NotFoundException,
+      UserNotFoundException,
     );
 
     expect(spies.cancelSubscriptionUseCase.handle).toHaveBeenCalledWith({
@@ -222,12 +222,12 @@ describe('SubscriptionController', () => {
     const fakeId = 'fakeId';
 
     spies.cancelSubscriptionUseCase.handle.mockRejectedValue(
-      new UnauthorizedException('', '', ''),
+      new NonBelongingException('', '', ''),
     );
 
     await expect(
       controller.cancel({ ...user, id: fakeId }, subscriptionId),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.cancelSubscriptionUseCase.handle).toHaveBeenCalledWith({
       subscriptionId,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ListOnePlanDTO } from 'src/application/dtos/list-plans.dto';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 import { ListPlansUseCase } from 'src/application/use-cases/list-plans.use-case';
 import { Plan } from 'src/domain/entities/plan';
 import { PlanRepository } from 'src/domain/repositories/plan.repository';
@@ -19,6 +19,8 @@ describe('ListPlansUseCase', () => {
     serviceExecutionsLimit: 15,
     clientCompanysLimit: 15,
     invoicesLimit: 15,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const plan2 = new Plan({
@@ -29,6 +31,8 @@ describe('ListPlansUseCase', () => {
     serviceExecutionsLimit: 10,
     clientCompanysLimit: 10,
     invoicesLimit: 10,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const plan3 = new Plan({
@@ -39,6 +43,8 @@ describe('ListPlansUseCase', () => {
     serviceExecutionsLimit: 5,
     clientCompanysLimit: 5,
     invoicesLimit: 5,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const dataOne: ListOnePlanDTO = {
@@ -68,11 +74,11 @@ describe('ListPlansUseCase', () => {
     expect(plan).toBe(plan1);
   });
 
-  it('shoul throw NotFoundException when the plan not exist', async () => {
+  it('shoul throw EntityNotFoundException when the plan not exist', async () => {
     const fakePlanId = '123456789098765432';
 
     await expect(useCase.one({ planId: fakePlanId })).rejects.toThrow(
-      NotFoundException,
+      EntityNotFoundException,
     );
 
     expect(spies.planRepository.findById).toHaveBeenCalledWith(fakePlanId);

@@ -4,8 +4,8 @@ import {
   IValidateUserService,
   ValidaterUserServiceDTO,
 } from 'src/application/services/ivalidate-user.service';
-import { ValidateUserServiceException } from 'src/infra/exceptions/validate-user-service.exception';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserNotFoundException } from 'src/infra/exceptions/user-not-found.exception';
 
 @Injectable()
 export class ValidateUserService implements IValidateUserService {
@@ -17,9 +17,8 @@ export class ValidateUserService implements IValidateUserService {
         where: { id: data.userId },
       });
       if (!admin)
-        throw new ValidateUserServiceException(
+        throw new UserNotFoundException(
           `Admin with ${data.userId} id not found`,
-          'Admin not found',
           ValidateUserService.name,
         );
 
@@ -34,9 +33,8 @@ export class ValidateUserService implements IValidateUserService {
       where: { id: data.userId },
     });
     if (!company)
-      throw new ValidateUserServiceException(
+      throw new UserNotFoundException(
         `Company with ${data.userId} id not found`,
-        'Company not found',
         ValidateUserService.name,
       );
 

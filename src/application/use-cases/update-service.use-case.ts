@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   SERVICE_REPOSITORY,
   type ServiceRespository,
@@ -15,6 +10,8 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { Service } from 'src/domain/entities/service';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
 
 @Injectable()
 export class UpdateServiceUseCase {
@@ -27,10 +24,19 @@ export class UpdateServiceUseCase {
 
   async handle(data: UpdateServiceDTO): Promise<{ service: Service }> {
     const service = await this.serviceRepository.findById(data.serviceId);
-    if (!service) throw new NotFoundException('Service not found');
+    if (!service)
+      throw new EntityNotFoundException(
+        `The Service of id: ${data.serviceId} not found`,
+        'Service not found',
+        UpdateServiceUseCase.name,
+      );
 
     if (service.companyId !== data.companyId)
-      throw new ForbiddenException('The service not belong to the company');
+      throw new NonBelongingException(
+        `The Service of id: ${data.serviceId} does not belong to the Company of id: ${data.companyId}`,
+        'The service not belong to the company',
+        UpdateServiceUseCase.name,
+      );
 
     const basePrice = data.basePrice
       ? PriceConverter.toRepository(data.basePrice)

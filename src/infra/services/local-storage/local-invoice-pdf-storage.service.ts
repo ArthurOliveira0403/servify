@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InvoicePdfStorageService } from 'src/application/services/invoice-pdf-storage.service';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import { LocalInvoicePdfStorageException } from '../../exceptions/local-invoice-pdf-storage-service.exception';
+import { InvoicePdfStorageException } from 'src/infra/exceptions/invoice-pdf-storage-service.exception';
 
 @Injectable()
 export class LocalInvoicePdfStorageService implements InvoicePdfStorageService {
@@ -36,9 +36,8 @@ export class LocalInvoicePdfStorageService implements InvoicePdfStorageService {
       const absolutePath = path.resolve(process.cwd(), filePath);
       return fs.readFile(absolutePath);
     } catch (error) {
-      throw new LocalInvoicePdfStorageException(
+      throw new InvoicePdfStorageException(
         `Error in make absolute path of get method: ${error}`,
-        'Error in archives storage',
         LocalInvoicePdfStorageService.name,
       );
     }

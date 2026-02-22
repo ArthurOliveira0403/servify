@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
   ListAllClientsCompanyDTO,
   ListOneClientCompanyDTO,
 } from 'src/application/dtos/list-clients-company.dto';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { ListClientsCompanyUseCase } from 'src/application/use-cases/list-clients-company.use-case';
 import { Client } from 'src/domain/entities/client';
 import { ClientCompany } from 'src/domain/entities/client-company';
@@ -18,6 +19,7 @@ const clientMock1 = new Client({
   id: 'client-1',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany1 = new ClientCompany({
@@ -26,12 +28,15 @@ const clientCompany1 = new ClientCompany({
   companyId: companyId,
   email: 'email@email.com',
   phone: '1234567890',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 const clientMock2 = new Client({
   id: 'client-2',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany2 = new ClientCompany({
@@ -40,12 +45,15 @@ const clientCompany2 = new ClientCompany({
   companyId: companyId,
   email: 'email2@email.com',
   phone: '0987654321',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 const clientMock3 = new Client({
   id: 'client-3',
   fullName: 'JohnDoe',
   internationalId: '12345',
+  createdAt: new Date(),
 });
 
 const clientCompany3 = new ClientCompany({
@@ -54,6 +62,8 @@ const clientCompany3 = new ClientCompany({
   companyId: companyId,
   email: 'newEmail@email.com',
   phone: '123456',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 describe('ListClientsCompanyUseCase', () => {
@@ -118,7 +128,7 @@ describe('ListClientsCompanyUseCase', () => {
     expect(response).toEqual(returnUseCase);
   });
 
-  it('should throw NotFoundException when the Client of ClientCompany not exists', async () => {
+  it('should throw EntityNotFoundException when the Client of ClientCompany not exists', async () => {
     await clientRepository.save(clientMock1);
     await clientRepository.save(clientMock2);
 
@@ -126,7 +136,7 @@ describe('ListClientsCompanyUseCase', () => {
     await clientCompanyRepository.save(clientCompany2);
     await clientCompanyRepository.save(clientCompany3);
 
-    await expect(useCase.all(dataAll)).rejects.toThrow(NotFoundException);
+    await expect(useCase.all(dataAll)).rejects.toThrow(EntityNotFoundException);
 
     expect(
       spies.clientCompanyRepository.findManyByCompany,
@@ -165,21 +175,21 @@ describe('ListClientsCompanyUseCase', () => {
     });
   });
 
-  it('should throw NotFoundException when the ClientCompany not exists', async () => {
+  it('should throw EntityNotFoundException when the ClientCompany not exists', async () => {
     await clientRepository.save(clientMock1);
     await clientRepository.save(clientMock2);
 
     await clientCompanyRepository.save(clientCompany1);
     await clientCompanyRepository.save(clientCompany2);
 
-    await expect(useCase.one(dataOne)).rejects.toThrow(NotFoundException);
+    await expect(useCase.one(dataOne)).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.clientCompanyRepository.findBydId).toHaveBeenCalledWith(
       dataOne.clientCompanyId,
     );
   });
 
-  it('should throw UnauthorizedException when the ClientCompany does belong to the Company not exists', async () => {
+  it('should throw NonBelongingException when the ClientCompany does belong to the Company not exists', async () => {
     await clientRepository.save(clientMock1);
     await clientRepository.save(clientMock2);
     await clientRepository.save(clientMock3);
@@ -190,14 +200,14 @@ describe('ListClientsCompanyUseCase', () => {
 
     await expect(
       useCase.one({ companyId: '1', clientCompanyId: dataOne.clientCompanyId }),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.clientCompanyRepository.findBydId).toHaveBeenCalledWith(
       dataOne.clientCompanyId,
     );
   });
 
-  it('should throw UnauthorizedException when the Client of ClientCompany does not exists', async () => {
+  it('should throw NonBelongingException when the Client of ClientCompany does not exists', async () => {
     await clientRepository.save(clientMock1);
     await clientRepository.save(clientMock2);
 
@@ -205,7 +215,7 @@ describe('ListClientsCompanyUseCase', () => {
     await clientCompanyRepository.save(clientCompany2);
     await clientCompanyRepository.save(clientCompany3);
 
-    await expect(useCase.one(dataOne)).rejects.toThrow(NotFoundException);
+    await expect(useCase.one(dataOne)).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.clientCompanyRepository.findBydId).toHaveBeenCalledWith(
       dataOne.clientCompanyId,

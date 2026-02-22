@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PDF_SERVICE, type PdfService } from '../services/pdf.service';
 import {
   INVOICE_REPOSITORY,
@@ -21,6 +16,8 @@ import {
 } from '../services/date-transform.service';
 import { Invoice } from 'src/domain/entities/invoice';
 import { PriceConverter } from '../common/price-converter.common';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 
 @Injectable()
 export class GenerateInvoicePdfUseCase {
@@ -37,11 +34,18 @@ export class GenerateInvoicePdfUseCase {
 
   async handle(data: GenerateInvoicePdfDTO): Promise<Buffer> {
     const invoice = await this.invoiceRepository.findById(data.invoiceId);
-    if (!invoice) throw new NotFoundException('Invoice not found');
+    if (!invoice)
+      throw new EntityNotFoundException(
+        `The Invoice of id: ${data.invoiceId} not found`,
+        'Invoice not found',
+        GenerateInvoicePdfUseCase.name,
+      );
 
     if (invoice.companyId !== data.companyId)
-      throw new UnauthorizedException(
-        'The invoice does not belong to the User Company',
+      throw new NonBelongingException(
+        `The Invoice of id: ${data.invoiceId} does not belong to the company of id: ${data.companyId}`,
+        'The invoice does not belong to the Company',
+        GenerateInvoicePdfUseCase.name,
       );
 
     if (invoice.pdfPath) {

@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   SERVICE_EXECUTION_REPOSITORY,
   type ServiceExecutionRepository,
@@ -27,6 +22,8 @@ import {
   type ISubscriptionPolicyService,
   SUBSCRIPTION_POLICY_SERVICE,
 } from '../services/isubcription-policy.service';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
 
 @Injectable()
 export class CreateServiceExecutionUseCase {
@@ -52,19 +49,31 @@ export class CreateServiceExecutionUseCase {
     );
 
     const service = await this.serviceRepository.findById(data.serviceId);
-    if (!service) throw new NotFoundException('Service not found');
+    if (!service)
+      throw new EntityNotFoundException(
+        `Service with id: ${data.serviceId} not found`,
+        'Service not found',
+        CreateServiceExecutionUseCase.name,
+      );
 
     const clientCompany = await this.clientCompanyRepository.findById(
       data.clientCompanyId,
     );
-    if (!clientCompany) throw new NotFoundException('Client company not found');
+    if (!clientCompany)
+      throw new EntityNotFoundException(
+        `The ClientCompany of id: ${data.clientCompanyId}`,
+        'ClientCompany not found',
+        CreateServiceExecutionUseCase.name,
+      );
 
     if (
       service.companyId !== clientCompany.companyId ||
       service.companyId !== data.companyId
     )
-      throw new ForbiddenException(
-        'Service and client company do not belong to the same company',
+      throw new NonBelongingException(
+        `The Service of id: ${data.serviceId} or ClientCompany of id: ${data.clientCompanyId}, not belong to the company of id: ${data.companyId}`,
+        'Service or clientCompany do not belong to the same company',
+        CreateServiceExecutionUseCase.name,
       );
 
     const serviceExecution = new ServiceExecution({

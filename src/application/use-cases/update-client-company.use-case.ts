@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { UpdateClientCompanyDTO } from '../dtos/update-client-company.dto';
 import {
   CLIENT_COMPANY_REPOSITORY,
@@ -18,6 +13,8 @@ import {
   CLIENT_REPOSITORY,
   type ClientRepository,
 } from 'src/domain/repositories/client.repository';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
 
 @Injectable()
 export class UpdateClientCompanyUseCase {
@@ -36,10 +33,19 @@ export class UpdateClientCompanyUseCase {
     const clientCompany = await this.clientCompanyRepository.findById(
       data.clientCompanyId,
     );
-    if (!clientCompany) throw new NotFoundException('Client Company not found');
+    if (!clientCompany)
+      throw new EntityNotFoundException(
+        `The Client Company of ${data.clientCompanyId} not found`,
+        'Client Company not found',
+        UpdateClientCompanyUseCase.name,
+      );
 
     if (clientCompany.companyId !== data.companyId)
-      throw new UnauthorizedException('Update not allowed');
+      throw new NonBelongingException(
+        `The ClientCompany of id: ${data.clientCompanyId} does not belong to the Company of id: ${data.companyId}`,
+        'The ClientCompany does not belong to the Company',
+        UpdateClientCompanyUseCase.name,
+      );
 
     clientCompany.updateDetails({
       email: data.email,
@@ -55,7 +61,12 @@ export class UpdateClientCompanyUseCase {
 
     const client = await this.clientRepository.findById(clientCompany.clientId);
 
-    if (!client) throw new NotFoundException('Client Not Found');
+    if (!client)
+      throw new EntityNotFoundException(
+        `The Client of id: ${clientCompanyUpdated!.clientId} not found`,
+        'Client Not Found',
+        UpdateClientCompanyUseCase.name,
+      );
 
     return { clientCompany: clientCompanyUpdated!, client };
   }

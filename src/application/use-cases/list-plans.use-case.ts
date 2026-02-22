@@ -5,7 +5,7 @@ import {
 } from 'src/domain/repositories/plan.repository';
 import { ListOnePlanDTO } from '../dtos/list-plans.dto';
 import { Plan } from 'src/domain/entities/plan';
-import { NotFoundException } from '../exceptions/not-found.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 
 @Injectable()
 export class ListPlansUseCase {
@@ -18,8 +18,8 @@ export class ListPlansUseCase {
     const plan = await this.planRepository.findById(data.planId);
 
     if (!plan)
-      throw new NotFoundException(
-        `Plan ${data.planId} not found`,
+      throw new EntityNotFoundException(
+        `Plan of id: ${data.planId} not found`,
         'Plan not found',
         ListPlansUseCase.name,
       );

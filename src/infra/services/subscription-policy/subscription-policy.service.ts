@@ -3,7 +3,6 @@ import {
   SUBSCRIPTION_REPOSITORY,
   type SubscriptionRepository,
 } from 'src/domain/repositories/subscription.repository';
-import { ForbiddenException } from 'src/application/exceptions/forbidden.exception';
 import { Feature, Subscription } from 'src/domain/entities/subscription';
 import {
   DATE_TRANSFORM_SERVICE,
@@ -14,6 +13,7 @@ import {
   type IFeatureCounterService,
 } from 'src/application/services/ifeature-counter.service';
 import { ISubscriptionPolicyService } from 'src/application/services/isubcription-policy.service';
+import { NonActiveSubscriptionException } from 'src/infra/exceptions/non-active-subscription.exception';
 
 @Injectable()
 export class SubscriptionPolicyService implements ISubscriptionPolicyService {
@@ -46,9 +46,8 @@ export class SubscriptionPolicyService implements ISubscriptionPolicyService {
       );
 
     if (!subscription)
-      throw new ForbiddenException(
+      throw new NonActiveSubscriptionException(
         `No active subscription of ${companyId} company`,
-        'No active subscription',
         SubscriptionPolicyService.name,
       );
 

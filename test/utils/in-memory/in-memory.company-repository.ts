@@ -16,6 +16,10 @@ export class InMemoryCompanyRepository implements CompanyRepository {
     const company = this.companys.find((c) => c.email === email);
     return company ?? null;
   }
+  async findByCnpj(cnpj: string): Promise<Company | null> {
+    const company = this.companys.find((c) => c.cnpj === cnpj);
+    return company ?? null;
+  }
   async update(company: Company): Promise<void> {
     const index = this.companys.findIndex((c) => c.id === company.id);
     if (index === -1) throw new Error('Company not found');

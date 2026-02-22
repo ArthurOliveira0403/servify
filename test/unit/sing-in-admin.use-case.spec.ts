@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { SignInAdminDTO } from 'src/application/dtos/sign-in-admin.dto';
-import { ForbiddenException } from 'src/application/exceptions/forbidden.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { InvalidCredentialsException } from 'src/application/exceptions/invalid-credentials.exception';
 import { SignInAdminUseCase } from 'src/application/use-cases/sign-in-admin.use-case';
 import { AdminRepository } from 'src/domain/repositories/admin.repository';
 import { InMemoryAdminRepository } from 'test/utils/in-memory/in-memory.admin-repository';
@@ -60,22 +61,22 @@ describe('SignInAdminUseCase', () => {
     expect(accessToken).toBe('fake-token');
   });
 
-  it('should throw ForbiddenException when exist not admin with the sended email', async () => {
+  it('should throw EntityNotFoundException when exist not admin with the sended email', async () => {
     const fakeEmail = 'email@email.com';
 
     await expect(useCase.handle({ ...data, email: fakeEmail })).rejects.toThrow(
-      ForbiddenException,
+      EntityNotFoundException,
     );
 
     expect(spies.adminRepository.findByEmail).toHaveBeenCalledWith(fakeEmail);
   });
 
-  it('should throw ForbiddenException when match not password', async () => {
+  it('should throw InvalidCredentialsException when match not password', async () => {
     const fakePassword = 'fakePassword';
 
     await expect(
       useCase.handle({ ...data, password: fakePassword }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(InvalidCredentialsException);
 
     const admin = await adminRepository.findByEmail(data.email);
 

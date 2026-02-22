@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -19,6 +19,7 @@ import { createSubscriptionHelper } from 'test/utils/helpers/create-subscription
 import { singUpAndLogin } from 'test/utils/helpers/sign-up-and-login.helper';
 import request from 'supertest';
 import { UpdateServiceBodyDTO } from 'src/infra/schemas/update-service.schemas';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 
 describe('Service (e2e)', () => {
   let app: NestFastifyApplication;
@@ -46,6 +47,7 @@ describe('Service (e2e)', () => {
           provide: APP_GUARD,
           useClass: RolesGuard,
         },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 
@@ -106,7 +108,7 @@ describe('Service (e2e)', () => {
     expect(response.body).toHaveProperty('serviceId');
   });
 
-  it('/service (POST) - shoudl return 500 when the company have reached the subscription services limit', async () => {
+  it('/service (POST) - shoudl return 403 when the company have reached the subscription services limit', async () => {
     await request(app.getHttpServer())
       .post('/service')
       .set('Authorization', `Bearer ${token}`)
@@ -129,7 +131,7 @@ describe('Service (e2e)', () => {
       .post('/service')
       .set('Authorization', `Bearer ${token}`)
       .send(serviceData)
-      .expect(500);
+      .expect(403);
   });
 
   // Corrigir após FilterException

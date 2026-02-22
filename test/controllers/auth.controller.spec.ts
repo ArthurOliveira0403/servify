@@ -1,5 +1,6 @@
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 import { SignInUseCase } from 'src/application/use-cases/sign-in.use-case';
 import { SignUpUseCase } from 'src/application/use-cases/sign-up.use-case';
 import { AuthController } from 'src/infra/http/controllers/auth.controller';
@@ -51,10 +52,10 @@ describe('authController', () => {
   it('should not register a company for company already exist', async () => {
     jest
       .spyOn(signUpUseCase, 'handle')
-      .mockRejectedValue(new UnauthorizedException());
+      .mockRejectedValue(new AlreadyExistException('', '', ''));
 
     await expect(authController.signUp(data)).rejects.toThrow(
-      UnauthorizedException,
+      AlreadyExistException,
     );
   });
 
@@ -73,26 +74,26 @@ describe('authController', () => {
   it('should not log in a company for invalid email', async () => {
     jest
       .spyOn(signInUseCase, 'handle')
-      .mockRejectedValue(new NotFoundException());
+      .mockRejectedValue(new EntityNotFoundException('', '', ''));
 
     await expect(
       authController.signIn({
         email: 'lumin@email.com',
         password: data.password,
       }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
   });
 
   it('should not log in a company for invalid password', async () => {
     jest
       .spyOn(signInUseCase, 'handle')
-      .mockRejectedValue(new UnauthorizedException());
+      .mockRejectedValue(new AlreadyExistException('', '', ''));
 
     await expect(
       authController.signIn({
         email: data.email,
         password: '33333',
       }),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(AlreadyExistException);
   });
 });

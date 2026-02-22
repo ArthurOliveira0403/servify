@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { NotFoundException } from '@nestjs/common';
-import { UpdateCompanyDTO } from 'src/application/dtos/update-company.dto';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 import { DateTransformService } from 'src/application/services/date-transform.service';
 import { UpdateCompanyUseCase } from 'src/application/use-cases/update-company.use-case';
 import { Address } from 'src/domain/entities/address';
@@ -29,7 +27,7 @@ describe('UpdateCompanyUseCase', () => {
   const companyMockWithAddress = new Company({
     id: '2',
     name: 'Luminnus',
-    cnpj: '1234567',
+    cnpj: '1234567098767890',
     email: 'luminnus@email.com',
     password: 'hashedPassword',
     address: new Address({
@@ -42,7 +40,7 @@ describe('UpdateCompanyUseCase', () => {
     updatedAt: new Date(),
   });
 
-  const data: UpdateCompanyDTO = {
+  const data = {
     address: {
       city: 'São Paulo',
       country: 'Brazil',
@@ -51,7 +49,7 @@ describe('UpdateCompanyUseCase', () => {
     phoneNumber: '084 9 9999-9999',
   };
 
-  const fakeNowUTC = new Date();
+  const now = new Date();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,17 +70,18 @@ describe('UpdateCompanyUseCase', () => {
         update: jest.spyOn(companyMock, 'update'),
       },
       dateTransformService: {
-        nowUTC: jest.spyOn(dateTransformService, 'nowUTC'),
+        nowUTC: jest.spyOn(dateTransformService, 'nowUTC').mockReturnValue(now),
       },
     };
-
-    spies.dateTransformService.nowUTC.mockReturnValue(fakeNowUTC);
   });
 
   it('should update a company that already has an address', async () => {
     await companyRepository.save(companyMockWithAddress);
 
-    const response = await useCase.handle(companyMockWithAddress.id, data);
+    const response = await useCase.handle({
+      companyId: companyMockWithAddress.id,
+      ...data,
+    });
 
     expect(spies.repository.findById).toHaveBeenCalledWith(
       companyMockWithAddress.id,
@@ -90,46 +89,59 @@ describe('UpdateCompanyUseCase', () => {
 
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.companyWithAddress.update).toHaveBeenCalledWith({
-      ...data,
-      now: fakeNowUTC,
+      address: {
+        city: data.address.city,
+        country: data.address.country,
+        number: data.address.number,
+      },
+      phoneNumber: data.phoneNumber,
+      now,
     });
     expect(spies.repository.update).toHaveBeenCalledWith(expect.any(Company));
 
     expect(response.company.address).toMatchObject({
-      city: 'São Paulo',
-      country: 'Brazil',
-      number: '781',
+      city: data.address.city,
+      country: data.address.country,
+      number: data.address.number,
     });
     expect(response.company.phoneNumber).toBe(data.phoneNumber);
-    expect(response.company.updatedAt).toBe(fakeNowUTC);
+    expect(response.company.updatedAt).toBe(now);
   });
 
   it('should create a address when company does not have one', async () => {
     await companyRepository.save(companyMock);
 
-    const response = await useCase.handle(companyMock.id, data);
+    const response = await useCase.handle({
+      companyId: companyMock.id,
+      ...data,
+    });
 
     expect(spies.repository.findById).toHaveBeenCalledWith(companyMock.id);
     expect(spies.dateTransformService.nowUTC).toHaveBeenCalled();
     expect(spies.company.update).toHaveBeenCalledWith({
-      ...data,
-      now: fakeNowUTC,
+      address: {
+        city: data.address.city,
+        country: data.address.country,
+        number: data.address.number,
+      },
+      phoneNumber: data.phoneNumber,
+      now,
     });
     expect(spies.repository.update).toHaveBeenCalledWith(expect.any(Company));
 
     expect(response.company.address).toMatchObject({
-      city: 'São Paulo',
-      country: 'Brazil',
-      number: '781',
+      city: data.address.city,
+      country: data.address.country,
+      number: data.address.number,
     });
     expect(response.company.phoneNumber).toBe(data.phoneNumber);
-    expect(response.company.updatedAt).toBe(fakeNowUTC);
+    expect(response.company.updatedAt).toBe(now);
   });
 
-  it('should not update for not found company', async () => {
-    await expect(useCase.handle(companyMock.id, data)).rejects.toThrow(
-      NotFoundException,
-    );
+  it('should throw EntityNotFoundException when company not found', async () => {
+    await expect(
+      useCase.handle({ companyId: companyMock.id, ...data }),
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.repository.findById).toHaveBeenCalledWith(companyMock.id);
   });

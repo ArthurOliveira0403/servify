@@ -20,7 +20,10 @@ export class CompanyController {
     @CurrentUser() user: AuthUser,
     @Body(Zod(updateCompanyBodySchema)) data: UpdateCompanyBodyDTO,
   ) {
-    const { company } = await this.updatedUseCase.handle(user.id, data);
+    const { company } = await this.updatedUseCase.handle({
+      ...data,
+      companyId: user.id,
+    });
 
     return {
       message: 'Company successfully updated',

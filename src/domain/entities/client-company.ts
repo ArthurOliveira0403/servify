@@ -48,7 +48,11 @@ export class ClientCompany {
 
   private validateProps(props: ClientCompanyProps | UpdateDetailsProps) {
     if (!props.email?.includes('@'))
-      throw new ClientCompanyException('Invalid email');
+      throw new ClientCompanyException(
+        'Invalid email on processign clientCompany entity',
+        'Invalid email',
+        ClientCompany.name,
+      );
   }
 
   get id() {

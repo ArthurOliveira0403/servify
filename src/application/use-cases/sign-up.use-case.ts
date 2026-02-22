@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { CompanyRepository } from 'src/domain/repositories/company.repository';
 import { SignUpDTO } from '../dtos/sign-up.dto';
 import { Company } from 'src/domain/entities/company';
@@ -11,6 +11,7 @@ import {
   DATE_TRANSFORM_SERVICE,
   type DateTransformService,
 } from '../services/date-transform.service';
+import { AlreadyExistException } from '../exceptions/already-exist.exception';
 
 @Injectable()
 export class SignUpUseCase {
@@ -27,7 +28,20 @@ export class SignUpUseCase {
     const companyByEmail = await this.companyRepository.findByEmail(data.email);
 
     if (companyByEmail)
-      throw new UnauthorizedException('The company already exist');
+      throw new AlreadyExistException(
+        `The company of email: ${data.email} already exist`,
+        'The company with this email already exist',
+        SignUpUseCase.name,
+      );
+
+    const companyByCnpj = await this.companyRepository.findByCnpj(data.cnpj);
+
+    if (companyByCnpj)
+      throw new AlreadyExistException(
+        `The company of cnpj: ${data.cnpj} already exist`,
+        'The company with this cnpj already exist',
+        SignUpUseCase.name,
+      );
 
     const hashPassword = await this.passwordHasher.hash(data.password);
 

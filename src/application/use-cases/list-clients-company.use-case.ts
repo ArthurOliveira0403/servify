@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ListAllClientsCompanyDTO,
   ListOneClientCompanyDTO,
@@ -18,6 +13,8 @@ import {
   type ClientRepository,
 } from 'src/domain/repositories/client.repository';
 import { ClientCompanyWithClientDTO } from '../dtos/shared/client-company-with-client.dto';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
 
 @Injectable()
 export class ListClientsCompanyUseCase {
@@ -42,8 +39,10 @@ export class ListClientsCompanyUseCase {
         const client = await this.clientRepository.findById(cc.clientId);
 
         if (!client)
-          throw new NotFoundException(
-            `Client of ClientCompany: ${cc.id} not found`,
+          throw new EntityNotFoundException(
+            `Client of id: ${cc.clientId} not found`,
+            `Client not found`,
+            ListClientsCompanyUseCase.name,
           );
 
         return { clientCompany: cc, client };
@@ -58,15 +57,27 @@ export class ListClientsCompanyUseCase {
       data.clientCompanyId,
     );
 
-    if (!clientCompany) throw new NotFoundException('ClientCompany Not Found');
+    if (!clientCompany)
+      throw new EntityNotFoundException(
+        `ClientCompany of id: ${data.clientCompanyId} not found`,
+        'ClientCompany Not Found',
+        ListClientsCompanyUseCase.name,
+      );
     if (clientCompany.companyId !== data.companyId)
-      throw new UnauthorizedException(
-        'The Client Company does not belong this company',
+      throw new NonBelongingException(
+        `The ClientCompany of id: ${data.clientCompanyId} does not belong the Company of id: ${data.companyId}`,
+        'The Client Company does not belong to the Company',
+        ListClientsCompanyUseCase.name,
       );
 
     const client = await this.clientRepository.findById(clientCompany.clientId);
 
-    if (!client) throw new NotFoundException('Client Not Found');
+    if (!client)
+      throw new EntityNotFoundException(
+        `Client of id: ${clientCompany.clientId} not found`,
+        'Client not found',
+        ListClientsCompanyUseCase.name,
+      );
 
     return { clientCompany, client };
   }

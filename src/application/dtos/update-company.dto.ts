@@ -1,4 +1,5 @@
 export abstract class UpdateCompanyDTO {
+  companyId: string;
   name?: string;
   address?: {
     country?: string;

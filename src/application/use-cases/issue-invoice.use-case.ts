@@ -1,10 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   INVOICE_REPOSITORY,
   type InvoiceRepository,
@@ -40,6 +34,9 @@ import {
   SUBSCRIPTION_POLICY_SERVICE,
   type ISubscriptionPolicyService,
 } from '../services/isubcription-policy.service';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { NonBelongingException } from '../exceptions/non-belonging.exception';
+import { AlreadyExistException } from '../exceptions/already-exist.exception';
 
 @Injectable()
 export class IssueInvoiceUseCase {
@@ -69,16 +66,28 @@ export class IssueInvoiceUseCase {
     );
 
     const company = await this.companyRepository.findById(data.companyId);
-    if (!company) throw new NotFoundException('Company User Not Found');
+    if (!company)
+      throw new EntityNotFoundException(
+        `The Company of id: ${data.companyId} not found`,
+        'Company Not Found',
+        IssueInvoiceUseCase.name,
+      );
 
     const execution = await this.serviceExecutionRepository.findById(
       data.serviceExecutionId,
     );
-    if (!execution) throw new NotFoundException('Service not found');
+    if (!execution)
+      throw new EntityNotFoundException(
+        `The Service execution of id: ${data.serviceExecutionId} not found`,
+        'Service execution not found',
+        IssueInvoiceUseCase.name,
+      );
 
     if (company.id !== execution.companyId)
-      throw new UnauthorizedException(
-        'The Service Execution do not belong to this company',
+      throw new NonBelongingException(
+        `The Service Execution of id: ${data.serviceExecutionId} does not belong to the Company of id: ${data.companyId}`,
+        'The Service Execution do not belong to the Company',
+        IssueInvoiceUseCase.name,
       );
 
     const service = await this.serviceRepository.findById(execution.serviceId);
@@ -95,7 +104,11 @@ export class IssueInvoiceUseCase {
         data.serviceExecutionId,
       );
     if (invoiceIssued)
-      throw new ConflictException('Invoice already exists for this execution');
+      throw new AlreadyExistException(
+        `Invoice already exists for Service Execution of id: ${data.serviceExecutionId}`,
+        'Invoice already exists for this execution',
+        IssueInvoiceUseCase.name,
+      );
 
     const invoice = new Invoice({
       companyId: data.companyId,

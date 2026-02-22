@@ -1,10 +1,11 @@
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 import { JwtAuthGuard } from 'src/infra/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/infra/guards/roles.guard';
 import { AuthModule } from 'src/infra/modules/auth.module';
@@ -44,6 +45,7 @@ describe('Company (e2e)', () => {
           provide: APP_GUARD,
           useClass: RolesGuard,
         },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 

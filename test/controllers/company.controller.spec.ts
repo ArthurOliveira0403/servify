@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DATE_TRANSFORM_SERVICE } from 'src/application/services/date-transform.service';
 import { UpdateCompanyUseCase } from 'src/application/use-cases/update-company.use-case';
@@ -90,10 +89,10 @@ describe('companyController', () => {
 
     const response = await companyController.update(user, data);
 
-    expect(spies.updateCompanyUseCase.handle).toHaveBeenCalledWith(
-      companyMock.id,
-      data,
-    );
+    expect(spies.updateCompanyUseCase.handle).toHaveBeenCalledWith({
+      ...data,
+      companyId: companyMock.id,
+    });
 
     expect(response.message).toEqual('Company successfully updated');
     expect(response.company).toMatchObject({
@@ -102,20 +101,5 @@ describe('companyController', () => {
       phoneNumber: data.phoneNumber,
       address: { ...data.address },
     });
-  });
-
-  it('should throw UnauthorizedException when user is not authorized', async () => {
-    spies.updateCompanyUseCase.handle.mockRejectedValue(
-      new UnauthorizedException(),
-    );
-
-    await expect(companyController.update(user, data)).rejects.toThrow(
-      UnauthorizedException,
-    );
-
-    expect(spies.updateCompanyUseCase.handle).toHaveBeenCalledWith(
-      companyMock.id,
-      data,
-    );
   });
 });

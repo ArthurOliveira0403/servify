@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from 'src/application/exceptions/conflict.exception';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 import { CreatePlanUseCase } from 'src/application/use-cases/create-plan.use-case';
 import { ListPlansUseCase } from 'src/application/use-cases/list-plans.use-case';
 import { UpdatePlanUseCase } from 'src/application/use-cases/update-plan.use-case';
@@ -142,13 +142,13 @@ describe('PlanController', () => {
     expect(response.planId).toBe(planId);
   });
 
-  it('should throw a ConflictException when already exists a plan with the name', async () => {
+  it('should throw a AlreadyExistException when already exists a plan with the name', async () => {
     spies.createPlanUseCase.handle.mockRejectedValue(
-      new ConflictException('', '', ''),
+      new AlreadyExistException('', '', ''),
     );
 
     await expect(controller.create(dataCreate)).rejects.toThrow(
-      ConflictException,
+      AlreadyExistException,
     );
 
     expect(spies.createPlanUseCase.handle).toHaveBeenCalledWith(dataCreate);
@@ -166,15 +166,15 @@ describe('PlanController', () => {
     expect(response.plan).toBe(plan);
   });
 
-  it('should throw a NotFoundExpection when the plan no exist', async () => {
+  it('should throw a EntityNotFoundException when the plan no exist', async () => {
     const fakePlanId = 'fakeId';
 
     spies.listPlansUseCase.one.mockRejectedValue(
-      new NotFoundException('', '', ''),
+      new EntityNotFoundException('', '', ''),
     );
 
     await expect(controller.listOne(fakePlanId)).rejects.toThrow(
-      NotFoundException,
+      EntityNotFoundException,
     );
   });
 
@@ -234,13 +234,13 @@ describe('PlanController', () => {
     expect(response.plan).toEqual(planUpdated);
   });
 
-  it('should throw a NotFoundException when the plan not exist', async () => {
+  it('should throw a EntityNotFoundException when the plan not exist', async () => {
     spies.updatePlanUseCase.handle.mockRejectedValue(
-      new NotFoundException('', '', ''),
+      new EntityNotFoundException('', '', ''),
     );
 
     await expect(controller.update(planId, dataUpdate)).rejects.toThrow(
-      NotFoundException,
+      EntityNotFoundException,
     );
 
     expect(spies.updatePlanUseCase.handle).toHaveBeenCalledWith({

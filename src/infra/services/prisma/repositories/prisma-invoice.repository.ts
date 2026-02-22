@@ -3,15 +3,18 @@ import { InvoiceRepository } from 'src/domain/repositories/invoice.repository';
 import { PrismaService } from '../prisma.service';
 import { Invoice } from 'src/domain/entities/invoice';
 import { PrismaInvoiceMapper } from '../mappers/prisma-invoice.mapper';
+import { PrismaWrapper } from '../wrapper/prisma.wrapper';
 
 @Injectable()
 export class PrismaInvoiceRepository implements InvoiceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(invoice: Invoice): Promise<void> {
-    const raw = PrismaInvoiceMapper.toPrisma(invoice);
+    return await PrismaWrapper.handle(async () => {
+      const raw = PrismaInvoiceMapper.toPrisma(invoice);
 
-    await this.prisma.invoice.create({ data: raw });
+      await this.prisma.invoice.create({ data: raw });
+    });
   }
 
   async findById(id: string): Promise<Invoice | null> {
@@ -24,24 +27,28 @@ export class PrismaInvoiceRepository implements InvoiceRepository {
   async findIssuedByServiceExecution(
     serviceExecutionId: string,
   ): Promise<Invoice | null> {
-    const invoice = await this.prisma.invoice.findFirst({
-      where: {
-        service_execution_id: serviceExecutionId,
-        AND: { status: 'VALID', service_execution_id: serviceExecutionId },
-      },
+    return await PrismaWrapper.handle(async () => {
+      const invoice = await this.prisma.invoice.findFirst({
+        where: {
+          service_execution_id: serviceExecutionId,
+          AND: { status: 'VALID', service_execution_id: serviceExecutionId },
+        },
+      });
+
+      if (!invoice) return null;
+
+      return PrismaInvoiceMapper.toDomain(invoice);
     });
-
-    if (!invoice) return null;
-
-    return PrismaInvoiceMapper.toDomain(invoice);
   }
 
   async update(invoice: Invoice): Promise<void> {
-    const raw = PrismaInvoiceMapper.toPrisma(invoice);
+    return await PrismaWrapper.handle(async () => {
+      const raw = PrismaInvoiceMapper.toPrisma(invoice);
 
-    await this.prisma.invoice.update({
-      where: { id: invoice.id },
-      data: raw,
+      await this.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: raw,
+      });
     });
   }
 }

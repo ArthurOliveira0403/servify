@@ -8,7 +8,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { PriceConverter } from '../common/price-converter.common';
-import { NotFoundException } from '../exceptions/not-found.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 
 export class UpdatePlanUseCase {
   constructor(
@@ -21,8 +21,8 @@ export class UpdatePlanUseCase {
   async handle(data: UpdatePlanDTO): Promise<{ plan: Plan }> {
     const planExist = await this.planRepository.findById(data.planId);
     if (!planExist)
-      throw new NotFoundException(
-        `Plan ${data.planId} not found`,
+      throw new EntityNotFoundException(
+        `The Plan of id: ${data.planId} not found`,
         'Plan not found',
         UpdatePlanUseCase.name,
       );

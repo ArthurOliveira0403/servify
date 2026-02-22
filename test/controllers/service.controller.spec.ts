@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateServiceUseCase } from 'src/application/use-cases/create-service.use-case';
 import { DeleteServiceUseCase } from 'src/application/use-cases/delete-service.use-case';
@@ -13,6 +12,8 @@ import { SubscriptionModule } from 'src/infra/modules/subscription.module';
 import { DateTrasnformModule } from 'src/infra/modules/date-transform.module';
 import { AuthUser } from 'src/application/common/auth-user.interface';
 import { UpdateServiceBodyDTO } from 'src/infra/schemas/update-service.schemas';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 
 const createServiceUseCaseMock = {
   provide: CreateServiceUseCase,
@@ -210,16 +211,16 @@ describe('ServiceController', () => {
     );
   });
 
-  it('should throw NotFoundException when the service exist not', async () => {
+  it('should throw EntityNotFoundException when the service exist not', async () => {
     spies.updateServiceUseCase.handle.mockRejectedValue(
-      new NotFoundException(),
+      new EntityNotFoundException('', '', ''),
     );
 
     const fakeServiceId = '1234567';
 
     await expect(
       serviceController.update(user, fakeServiceId, dataToUpdate),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
     expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith({
       ...dataToUpdate,
       serviceId: fakeServiceId,
@@ -227,9 +228,9 @@ describe('ServiceController', () => {
     });
   });
 
-  it('should throw ForbiddenException when the service belong not the company', async () => {
+  it('should throw NonBelongingException when the service belong not the company', async () => {
     spies.updateServiceUseCase.handle.mockRejectedValue(
-      new ForbiddenException(),
+      new NonBelongingException('', '', ''),
     );
 
     const fakeCompanyId = '1234567';
@@ -240,7 +241,7 @@ describe('ServiceController', () => {
         serviceMock1Id,
         dataToUpdate,
       ),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
     expect(spies.updateServiceUseCase.handle).toHaveBeenCalledWith({
       ...dataToUpdate,
       serviceId: serviceMock1Id,
@@ -261,15 +262,15 @@ describe('ServiceController', () => {
     expect(response.message).toBe('Successfully service deleted');
   });
 
-  it('should throw NotFoundException when the service exist not', async () => {
+  it('should throw EntityNotFoundException when the service exist not', async () => {
     spies.deleteServiceUseCase.handle.mockRejectedValue(
-      new NotFoundException(),
+      new EntityNotFoundException('', '', ''),
     );
 
     const fakeServiceId = '123456';
 
     await expect(serviceController.delete(user, fakeServiceId)).rejects.toThrow(
-      NotFoundException,
+      EntityNotFoundException,
     );
     expect(spies.deleteServiceUseCase.handle).toHaveBeenCalledWith({
       serviceId: fakeServiceId,
@@ -277,16 +278,16 @@ describe('ServiceController', () => {
     });
   });
 
-  it('should throw NotFoundException when the service belong not the company', async () => {
+  it('should throw EntityNotFoundException when the service belong not the company', async () => {
     spies.deleteServiceUseCase.handle.mockRejectedValue(
-      new ForbiddenException(),
+      new NonBelongingException('', '', ''),
     );
 
     const fakeCompanyId = '123456';
 
     await expect(
       serviceController.delete({ ...user, id: fakeCompanyId }, serviceMock1Id),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
     expect(spies.deleteServiceUseCase.handle).toHaveBeenCalledWith({
       serviceId: serviceMock1Id,
       companyId: fakeCompanyId,

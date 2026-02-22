@@ -12,12 +12,13 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'src/infra/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/infra/guards/roles.guard';
 import { CreatePlanBodyDTO } from 'src/infra/schemas/create-plan.schemas';
 import { createSubscriptionHelper } from 'test/utils/helpers/create-subscription.helper';
 import { PrismaService } from 'src/infra/services/prisma/prisma.service';
+import { GlobalExceptionFilter } from 'src/infra/filters/global-exception.filter';
 
 describe('ClientCompany (e2e)', () => {
   let app: NestFastifyApplication;
@@ -42,6 +43,7 @@ describe('ClientCompany (e2e)', () => {
           provide: APP_GUARD,
           useClass: RolesGuard,
         },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
       ],
     }).compile();
 
@@ -155,7 +157,7 @@ describe('ClientCompany (e2e)', () => {
       .expect(403);
   });
 
-  it('/client-company (POST) - should return 500 when the company reached the subscription clients company limit', async () => {
+  it('/client-company (POST) - should return 403 when the company reached the subscription clients company limit', async () => {
     await request(app.getHttpServer())
       .post('/client-company')
       .set('Authorization', `Bearer ${token}`)
@@ -178,7 +180,7 @@ describe('ClientCompany (e2e)', () => {
       .post('/client-company')
       .set('Authorization', `Bearer ${token}`)
       .send({ ...dataToCreate, internationalId: `${randomUUID()}` })
-      .expect(500);
+      .expect(403);
   });
 
   // ==================== Find All ====================

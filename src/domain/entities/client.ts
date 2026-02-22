@@ -25,7 +25,11 @@ export class Client {
 
   private validateProps(props: ClientProps) {
     if (props.fullName.length < 2 || props.fullName.length > 100)
-      throw new ClientException('Name vary small or very large');
+      throw new ClientException(
+        'Invalid Email on processing Client entity',
+        'Name vary small or very large',
+        Client.name,
+      );
   }
 
   get id() {

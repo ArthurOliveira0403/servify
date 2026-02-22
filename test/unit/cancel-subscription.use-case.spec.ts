@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { CancelSubscriptionDTO } from 'src/application/dtos/cancel-subscription.dto';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
-import { UnauthorizedException } from 'src/application/exceptions/unauthorized.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { CancelSubscriptionUseCase } from 'src/application/use-cases/cancel-subscription.use-case';
 import { Subscription } from 'src/domain/entities/subscription';
 import { SubscriptionException } from 'src/domain/exceptions/subscription.exception';
@@ -77,7 +77,7 @@ describe('CancelSubscriptionUseCase', () => {
     expect(subscriptionCanceled!.autoRenew).toBe(false);
   });
 
-  it('should throw NotFoundException when the subscription not exists', async () => {
+  it('should throw EntityNotFoundException when the subscription not exists', async () => {
     const fakeSubscriptionId = '1234567890';
 
     await expect(
@@ -85,14 +85,14 @@ describe('CancelSubscriptionUseCase', () => {
         companyId: data.companyId,
         subscriptionId: fakeSubscriptionId,
       }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.subscriptionRepository.findById).toHaveBeenCalledWith(
       fakeSubscriptionId,
     );
   });
 
-  it('should throw UnauthorizedException when the subscription not belong to the company', async () => {
+  it('should throw NonBelongingException when the subscription not belong to the company', async () => {
     const fakeCompanyId = '12345678900987654321';
 
     await expect(
@@ -100,7 +100,7 @@ describe('CancelSubscriptionUseCase', () => {
         companyId: fakeCompanyId,
         subscriptionId: data.subscriptionId,
       }),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.subscriptionRepository.findById).toHaveBeenCalledWith(
       data.subscriptionId,

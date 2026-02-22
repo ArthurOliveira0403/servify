@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { DeleteServiceUseCase } from 'src/application/use-cases/delete-service.use-case';
 import { Service } from 'src/domain/entities/service';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
@@ -19,6 +20,8 @@ describe('DeleteServiceUseCase', () => {
     companyId,
     description: 'A service',
     basePrice: 159.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   beforeEach(async () => {
@@ -45,24 +48,24 @@ describe('DeleteServiceUseCase', () => {
     expect(service).toBeNull();
   });
 
-  it('should throw a NotFoundException when serviceId is invalid', async () => {
+  it('should throw a EntityNotFoundException when serviceId is invalid', async () => {
     const fakeServiceId = '123456';
 
     await expect(
       useCase.handle({ serviceId: fakeServiceId, companyId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(spies.serviceRespository.findById).toHaveBeenLastCalledWith(
       fakeServiceId,
     );
   });
 
-  it('should throw a ForbiddenException when the service belong not the company', async () => {
+  it('should throw a NonBelonginException when the service belong not the company', async () => {
     const fakeCompanyId = '123456';
 
     await expect(
       useCase.handle({ serviceId, companyId: fakeCompanyId }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.serviceRespository.findById).toHaveBeenLastCalledWith(
       serviceId,

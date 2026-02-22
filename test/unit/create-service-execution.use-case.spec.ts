@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreateServiceExecutionDTO } from 'src/application/dtos/create-service-execution.dto';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { NonBelongingException } from 'src/application/exceptions/non-belonging.exception';
 import { CreateServiceExecutionUseCase } from 'src/application/use-cases/create-service-execution.use-case';
 import { ClientCompany } from 'src/domain/entities/client-company';
 import { Service } from 'src/domain/entities/service';
@@ -29,6 +30,8 @@ describe('CreateServiceExecutionUseCase', () => {
     name: 'A service',
     description: 'A description',
     basePrice: 299.99,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const clientCompanyMock = new ClientCompany({
@@ -36,6 +39,8 @@ describe('CreateServiceExecutionUseCase', () => {
     clientId: '2',
     email: 'email@email.com',
     phone: '1223468',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const data: CreateServiceExecutionDTO = {
@@ -108,7 +113,7 @@ describe('CreateServiceExecutionUseCase', () => {
     expect(response.serviceExecutionId).toBe(serviceExecutionId);
   });
 
-  it('should throw NotFoundException when the service does not exists', async () => {
+  it('should throw EntityNotFoundException when the service does not exists', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -121,10 +126,10 @@ describe('CreateServiceExecutionUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, serviceId: fakeServiceId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
   });
 
-  it('should throw NotFoundException when the clientCompany does not exists', async () => {
+  it('should throw EntityNotFoundException when the clientCompany does not exists', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -137,10 +142,10 @@ describe('CreateServiceExecutionUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, clientCompanyId: fakeClienCompanyId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
   });
 
-  it('should throw a ForbiddenException when the Service companyId does not match with the ClientCompany companyId', async () => {
+  it('should throw a NonBelongingException when the Service companyId does not match with the ClientCompany companyId', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -149,12 +154,14 @@ describe('CreateServiceExecutionUseCase', () => {
       name: 'A name',
       description: 'A description',
       basePrice: 129.99,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     await serviceRepository.save(otherServiceMock);
 
     await expect(
       useCase.handle({ ...data, serviceId: otherServiceMock.id }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
       data.companyId,
@@ -162,7 +169,7 @@ describe('CreateServiceExecutionUseCase', () => {
     );
   });
 
-  it('should throw a ForbiddenException when the Service companyId does not match with the "User" companyId', async () => {
+  it('should throw a NonBelongingException when the Service companyId does not match with the "User" companyId', async () => {
     await serviceRepository.save(serviceMock);
     await clientCompanyRepository.save(clientCompanyMock);
 
@@ -170,7 +177,7 @@ describe('CreateServiceExecutionUseCase', () => {
 
     await expect(
       useCase.handle({ ...data, companyId: otherCompanyId }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(NonBelongingException);
 
     expect(spies.subscriptionPolicyService.handle).toHaveBeenCalledWith(
       data.companyId,

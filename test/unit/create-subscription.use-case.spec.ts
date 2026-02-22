@@ -8,8 +8,8 @@ import { SubscriptionRepository } from 'src/domain/repositories/subscription.rep
 import { InMemoryPlanRepository } from 'test/utils/in-memory/in-memory.plan-repository';
 import { InMemorySubscriptionRepository } from 'test/utils/in-memory/in-memory.subscription-repository';
 import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
-import { ConflictException } from 'src/application/exceptions/conflict.exception';
-import { NotFoundException } from 'src/application/exceptions/not-found.exception';
+import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
+import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
 
 describe('CreateSubscriptionUseCase', () => {
   let useCase: CreateSusbcriptionUseCase;
@@ -29,6 +29,8 @@ describe('CreateSubscriptionUseCase', () => {
     serviceExecutionsLimit: 12,
     clientCompanysLimit: 12,
     invoicesLimit: 12,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const monthlyData: CreateSubscriptionDTO = {
@@ -45,6 +47,8 @@ describe('CreateSubscriptionUseCase', () => {
     serviceExecutionsLimit: 15,
     clientCompanysLimit: 15,
     invoicesLimit: 15,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   const yearlyData: CreateSubscriptionDTO = {
@@ -158,22 +162,24 @@ describe('CreateSubscriptionUseCase', () => {
     expect(subscription.autoRenew).toBe(true);
   });
 
-  it('should throw a ConflictException when already exists a active subscription', async () => {
+  it('should throw a AlreadyExistException when already exists a active subscription', async () => {
     await useCase.handle(monthlyData);
 
-    await expect(useCase.handle(yearlyData)).rejects.toThrow(ConflictException);
+    await expect(useCase.handle(yearlyData)).rejects.toThrow(
+      AlreadyExistException,
+    );
 
     expect(
       spies.subscriptionRepository.listActiveSubscriptionOfCompany,
     ).toHaveBeenCalledWith(yearlyData.companyId);
   });
 
-  it('should throw a NotFoundException when the plan not exists', async () => {
+  it('should throw a EntityNotFoundException when the plan not exists', async () => {
     const fakePlanId = '1234567890';
 
     await expect(
       useCase.handle({ companyId: monthlyData.companyId, planId: fakePlanId }),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(EntityNotFoundException);
 
     expect(
       spies.subscriptionRepository.listActiveSubscriptionOfCompany,

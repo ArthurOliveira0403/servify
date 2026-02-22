@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UpdateCompanyDTO } from '../dtos/update-company.dto';
 import {
   COMPANY_REPOSITORY,
@@ -9,6 +9,7 @@ import {
   type DateTransformService,
 } from '../services/date-transform.service';
 import { Company } from 'src/domain/entities/company';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 
 @Injectable()
 export class UpdateCompanyUseCase {
@@ -19,14 +20,21 @@ export class UpdateCompanyUseCase {
     private dateTrasformService: DateTransformService,
   ) {}
 
-  async handle(
-    id: string,
-    data: UpdateCompanyDTO,
-  ): Promise<{ company: Company }> {
-    const company = await this.companyRepository.findById(id);
-    if (!company) throw new NotFoundException('Company not found');
+  async handle(data: UpdateCompanyDTO): Promise<{ company: Company }> {
+    const company = await this.companyRepository.findById(data.companyId);
+    if (!company)
+      throw new EntityNotFoundException(
+        `The Company of id: ${data.companyId} not found`,
+        'Company not found',
+        UpdateCompanyUseCase.name,
+      );
 
-    company.update({ ...data, now: this.dateTrasformService.nowUTC() });
+    company.update({
+      name: data.name,
+      address: data.address,
+      phoneNumber: data.phoneNumber,
+      now: this.dateTrasformService.nowUTC(),
+    });
 
     await this.companyRepository.update(company);
 
