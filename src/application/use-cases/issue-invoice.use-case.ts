@@ -90,15 +90,6 @@ export class IssueInvoiceUseCase {
         IssueInvoiceUseCase.name,
       );
 
-    const service = await this.serviceRepository.findById(execution.serviceId);
-
-    const clientCompany = await this.clientCompanyRepository.findById(
-      execution.clientCompanyId,
-    );
-    const client = await this.clientRepository.findById(
-      clientCompany!.clientId,
-    );
-
     const invoiceIssued =
       await this.invoiceRepository.findIssuedByServiceExecution(
         data.serviceExecutionId,
@@ -109,6 +100,19 @@ export class IssueInvoiceUseCase {
         'Invoice already exists for this execution',
         IssueInvoiceUseCase.name,
       );
+
+    // Tratar regra de negócio de Service (Ativo / Invativo)
+    const service = await this.serviceRepository.findById(execution.serviceId);
+
+    // Tratar possível falha de busca de cliente
+    const clientCompany = await this.clientCompanyRepository.findById(
+      execution.clientCompanyId,
+    );
+    const client = await this.clientRepository.findById(
+      clientCompany!.clientId,
+    );
+
+    const now = this.dateTransformService.nowUTC();
 
     const invoice = new Invoice({
       companyId: data.companyId,
@@ -123,11 +127,11 @@ export class IssueInvoiceUseCase {
       serviceDescription: service!.description,
       executedAt: execution.executedAt,
       price: execution.price,
-      issuedAt: this.dateTransformService.nowUTC(),
+      issuedAt: now,
       invoiceNumber: this.generateInvoiceNumber(),
       timezone: data.timezone,
-      createdAt: this.dateTransformService.nowUTC(),
-      updatedAt: this.dateTransformService.nowUTC(),
+      createdAt: now,
+      updatedAt: now,
     });
 
     await this.invoiceRepository.save(invoice);

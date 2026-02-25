@@ -134,12 +134,12 @@ describe('Plan (e2e)', () => {
   });
 
   it('/plan (POST) - should return 403 statuCode when some company try create a plan', async () => {
-    const companyToken = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
 
     await request(app.getHttpServer())
       .post('/plan')
       .send(dataToCreate)
-      .set('Authorization', `Bearer ${companyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -177,7 +177,7 @@ describe('Plan (e2e)', () => {
   });
 
   it('/plan/:id (GET) - should return 403 statuCode when some company try list one plan', async () => {
-    const companyToken = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
 
     const response = await request(app.getHttpServer())
       .post('/plan')
@@ -189,7 +189,7 @@ describe('Plan (e2e)', () => {
 
     await request(app.getHttpServer())
       .get(`/plan/${planId}`)
-      .set('Authorization', `Bearer ${companyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -222,7 +222,7 @@ describe('Plan (e2e)', () => {
   });
 
   it('/plan (GET) - should return 403 statuCode when some company try list all plans', async () => {
-    const companyToken = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
 
     await request(app.getHttpServer())
       .post('/plan')
@@ -244,7 +244,7 @@ describe('Plan (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/plan')
-      .set('Authorization', `Bearer ${companyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -287,7 +287,7 @@ describe('Plan (e2e)', () => {
   });
 
   it('/plan/:id (PATCH) - should return 403 when some company try update a plan', async () => {
-    const companyToken = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
 
     const response = await request(app.getHttpServer())
       .post('/plan')
@@ -300,7 +300,7 @@ describe('Plan (e2e)', () => {
     await request(app.getHttpServer())
       .patch(`/plan/${planId}`)
       .send(dataToUpdate)
-      .set('Authorization', `Bearer ${companyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 });

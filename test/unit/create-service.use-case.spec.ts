@@ -6,7 +6,7 @@ import { Service } from 'src/domain/entities/service';
 import { Feature } from 'src/domain/entities/subscription';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
 import { InMemoryServiceRepository } from 'test/utils/in-memory/in-memory.service-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('createServiceUseCase', () => {
@@ -23,7 +23,7 @@ describe('createServiceUseCase', () => {
 
   beforeEach(() => {
     serviceRepository = new InMemoryServiceRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     const subscriptionPolicyService = SubscriptionPolicyServiceMock;
     useCase = new CreateServiceUseCase(
       serviceRepository,

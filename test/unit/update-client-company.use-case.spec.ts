@@ -11,7 +11,7 @@ import { ClientCompanyRepository } from 'src/domain/repositories/client-company.
 import { ClientRepository } from 'src/domain/repositories/client.repository';
 import { InMemoryClientCompanyRepository } from 'test/utils/in-memory/in-memory.client-company.repository';
 import { InMemoryClientRepository } from 'test/utils/in-memory/in-memory.client-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('UpdateClientCompanyUseCase', () => {
   let useCase: UpdateClientCompanyUseCase;
@@ -50,7 +50,7 @@ describe('UpdateClientCompanyUseCase', () => {
     jest.clearAllMocks();
 
     repository = new InMemoryClientCompanyRepository();
-    dateTransformService = dateTransformMock;
+    dateTransformService = dateTransformServiceMock;
     clientRepository = new InMemoryClientRepository();
     useCase = new UpdateClientCompanyUseCase(
       repository,

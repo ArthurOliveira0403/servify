@@ -1,12 +1,4 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { GenerateInvoicePdfUseCase } from 'src/application/use-cases/generate-invoice-pdf.use-case';
 import { IssueInvoiceUseCase } from 'src/application/use-cases/issue-invoice.use-case';
 import {
@@ -33,19 +25,17 @@ export class InvoiceController {
     private generateInvoicePdfUseCase: GenerateInvoicePdfUseCase,
   ) {}
 
-  @Post(':id/issue')
+  @Post(':execution_id/issue')
   @UseGuards(SubscriptionGuard)
   async issueInvoice(
-    @Param('id', Zod(issueInvoiceParamSchema))
-    id: IssueInvoiceParamDTO,
+    @Param('execution_id', Zod(issueInvoiceParamSchema))
+    execution_id: IssueInvoiceParamDTO,
     @CurrentUser() user: AuthUser,
     @Timezone() timezone: string,
   ) {
-    if (!timezone) throw new BadRequestException('Timezone not informed');
-
     const { invoiceId } = await this.issueInvoiceUseCase.handle({
       companyId: user.id,
-      serviceExecutionId: id,
+      serviceExecutionId: execution_id,
       timezone,
     });
 

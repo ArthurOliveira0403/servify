@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { PlanType } from './plan';
 import { SubscriptionException } from '../exceptions/subscription.exception';
 import { ExpiredSubscriptionException } from '../exceptions/expired-subscripton';
-import { SubscriptonLimitReachedException } from '../exceptions/subscription-limit-reached.exception';
+import { SubscriptionLimitReachedException } from '../exceptions/subscription-limit-reached.exception';
 
 export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED';
 export enum Feature {
@@ -90,7 +90,7 @@ export class Subscription {
     const limit = this.limit(feature);
 
     if (limit <= currentCount)
-      throw new SubscriptonLimitReachedException(
+      throw new SubscriptionLimitReachedException(
         `The ${feature} limit of subcription of id: ${this.id} reached`,
         'Feature limit reached',
         Subscription.name,

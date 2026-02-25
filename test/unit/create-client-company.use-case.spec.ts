@@ -9,7 +9,7 @@ import { ClientCompanyRepository } from 'src/domain/repositories/client-company.
 import { ClientRepository } from 'src/domain/repositories/client.repository';
 import { InMemoryClientCompanyRepository } from 'test/utils/in-memory/in-memory.client-company.repository';
 import { InMemoryClientRepository } from 'test/utils/in-memory/in-memory.client-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('CreateClientCompanyUseCase', () => {
@@ -29,7 +29,7 @@ describe('CreateClientCompanyUseCase', () => {
   beforeEach(() => {
     clientCompanyRepository = new InMemoryClientCompanyRepository();
     clientRepository = new InMemoryClientRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     const subscriptionPolicyService = SubscriptionPolicyServiceMock;
     useCase = new CreateClientCompanyUseCase(
       clientRepository,

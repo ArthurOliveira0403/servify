@@ -6,7 +6,7 @@ import { Address } from 'src/domain/entities/address';
 import { Company } from 'src/domain/entities/company';
 import { CompanyRepository } from 'src/domain/repositories/company.repository';
 import { InMemoryCompanyRepository } from 'test/utils/in-memory/in-memory.company-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('UpdateCompanyUseCase', () => {
   let useCase: UpdateCompanyUseCase;
@@ -55,7 +55,7 @@ describe('UpdateCompanyUseCase', () => {
     jest.clearAllMocks();
 
     companyRepository = new InMemoryCompanyRepository();
-    dateTransformService = dateTransformMock;
+    dateTransformService = dateTransformServiceMock;
     useCase = new UpdateCompanyUseCase(companyRepository, dateTransformService);
 
     spies = {

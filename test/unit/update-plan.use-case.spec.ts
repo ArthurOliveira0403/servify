@@ -6,7 +6,7 @@ import { UpdatePlanUseCase } from 'src/application/use-cases/update-plan.use-cas
 import { Plan } from 'src/domain/entities/plan';
 import { PlanRepository } from 'src/domain/repositories/plan.repository';
 import { InMemoryPlanRepository } from 'test/utils/in-memory/in-memory.plan-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('UpdatePlanUseCase', () => {
   let useCase: UpdatePlanUseCase;
@@ -35,7 +35,7 @@ describe('UpdatePlanUseCase', () => {
 
   beforeEach(async () => {
     planRepository = new InMemoryPlanRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     useCase = new UpdatePlanUseCase(planRepository, dateTransformService);
 
     spies = {

@@ -15,6 +15,18 @@ export async function clientCompanySeed(
   },
 ): Promise<{ clientCompanyId: string }> {
   try {
+    const clientExist = await prisma.client.findUnique({
+      where: { international_id: data.internationalId },
+    });
+
+    if (clientExist) {
+      const clientCompany = await prisma.clientCompany.findFirst({
+        where: { client_id: clientExist.id },
+      });
+
+      return { clientCompanyId: clientCompany!.id };
+    }
+
     const company = await prisma.company.findUnique({
       where: { cnpj: data.companyCnpj },
     });

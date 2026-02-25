@@ -8,7 +8,7 @@ import { Address } from 'src/domain/entities/address';
 import { Company } from 'src/domain/entities/company';
 import { CompanyController } from 'src/infra/http/controllers/company.controller';
 import { UpdateCompanyBodyDTO } from 'src/infra/schemas/update-company.schemas';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 const updateCompanyUseCaseMock = {
   provide: UpdateCompanyUseCase,
@@ -50,7 +50,10 @@ describe('companyController', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         updateCompanyUseCaseMock,
-        { provide: DATE_TRANSFORM_SERVICE, useValue: dateTransformMock },
+        {
+          provide: DATE_TRANSFORM_SERVICE,
+          useValue: dateTransformServiceMock,
+        },
       ],
       controllers: [CompanyController],
     }).compile();

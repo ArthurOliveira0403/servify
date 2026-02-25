@@ -86,7 +86,8 @@ describe('ClientCompany (e2e)', () => {
       password: 'strongPassword123',
     };
 
-    token = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
+    token = accessToken;
 
     planData = {
       name: `name_${randomUUID().slice(0, 25)}`, // No ZodSchema para criar, o limitede caracteres para o nome é 30
@@ -141,7 +142,7 @@ describe('ClientCompany (e2e)', () => {
   });
 
   it('/client-company (POST) - should return 403 when the company have not an active subscription', async () => {
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -150,7 +151,7 @@ describe('ClientCompany (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/client-company')
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({
         ...dataToCreate,
       })
@@ -210,7 +211,7 @@ describe('ClientCompany (e2e)', () => {
   });
 
   it('/client-company (GET) - should return 403 when the company have not an active subscription', async () => {
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -219,7 +220,7 @@ describe('ClientCompany (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/client-company')
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -253,7 +254,7 @@ describe('ClientCompany (e2e)', () => {
   it('/client-company/:id (GET) - should return 403 when the company have not an active subscription', async () => {
     const simuledClientCompanyId = '123456';
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -262,7 +263,7 @@ describe('ClientCompany (e2e)', () => {
 
     await request(app.getHttpServer())
       .get(`/client-company/${simuledClientCompanyId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -308,7 +309,7 @@ describe('ClientCompany (e2e)', () => {
   it('/client-company/:id (PATCH) - should return 403 when the company have not an active subscription', async () => {
     const simuledClientCompanyId = '123456';
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -317,7 +318,7 @@ describe('ClientCompany (e2e)', () => {
 
     await request(app.getHttpServer())
       .patch(`/client-company/${simuledClientCompanyId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 });

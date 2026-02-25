@@ -6,7 +6,7 @@ import { CreatePlanUseCase } from 'src/application/use-cases/create-plan.use-cas
 import { Plan } from 'src/domain/entities/plan';
 import { PlanRepository } from 'src/domain/repositories/plan.repository';
 import { InMemoryPlanRepository } from 'test/utils/in-memory/in-memory.plan-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('CreatePlanUseCase', () => {
   let useCase: CreatePlanUseCase;
@@ -25,7 +25,7 @@ describe('CreatePlanUseCase', () => {
 
   beforeEach(() => {
     planRepository = new InMemoryPlanRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     useCase = new CreatePlanUseCase(planRepository, dateTransformService);
 
     spies = {

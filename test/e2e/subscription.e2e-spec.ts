@@ -76,7 +76,8 @@ describe('Subscription (e2e)', () => {
       password: '123456787654321',
     };
 
-    token = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
+    token = accessToken;
   });
 
   afterAll(async () => {
@@ -159,7 +160,7 @@ describe('Subscription (e2e)', () => {
   });
 
   it('/subscription/:id (DELETE) - should return return 403 when the subscription not belong to the company', async () => {
-    const otherCompanyToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherName',
       cnpj: 'otherCnpj',
       email: 'otherCompany@email.com',
@@ -175,7 +176,7 @@ describe('Subscription (e2e)', () => {
 
     await request(app.getHttpServer())
       .delete(`/subscription/${subscriptionId}`)
-      .set('Authorization', `Bearer ${otherCompanyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 });

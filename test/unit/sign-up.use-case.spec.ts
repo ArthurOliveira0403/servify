@@ -7,7 +7,7 @@ import { SignUpUseCase } from 'src/application/use-cases/sign-up.use-case';
 import { Company } from 'src/domain/entities/company';
 import { CompanyRepository } from 'src/domain/repositories/company.repository';
 import { InMemoryCompanyRepository } from 'test/utils/in-memory/in-memory.company-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 import { HasherServiceMock } from 'test/utils/mocks/hasher-service.mock';
 
 describe('SignUpUseCase', () => {
@@ -27,7 +27,7 @@ describe('SignUpUseCase', () => {
   beforeEach(() => {
     repository = new InMemoryCompanyRepository();
     hasher = HasherServiceMock;
-    dateTransformService = dateTransformMock;
+    dateTransformService = dateTransformServiceMock;
     useCase = new SignUpUseCase(repository, hasher, dateTransformService);
 
     spies = {

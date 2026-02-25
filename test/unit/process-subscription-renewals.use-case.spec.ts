@@ -3,7 +3,7 @@ import { ProcessSubscriptionsRenewalsUseCase } from 'src/application/use-cases/p
 import { Subscription } from 'src/domain/entities/subscription';
 import { SubscriptionRepository } from 'src/domain/repositories/subscription.repository';
 import { InMemorySubscriptionRepository } from 'test/utils/in-memory/in-memory.subscription-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('ProcessSubscriptionRenewalsUseCae', () => {
   let useCase: ProcessSubscriptionsRenewalsUseCase;
@@ -74,7 +74,7 @@ describe('ProcessSubscriptionRenewalsUseCae', () => {
 
   beforeEach(async () => {
     subscriptionRepository = new InMemorySubscriptionRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     useCase = new ProcessSubscriptionsRenewalsUseCase(
       subscriptionRepository,
       dateTransformService,
@@ -121,7 +121,7 @@ describe('ProcessSubscriptionRenewalsUseCae', () => {
 
     expect(sub2!.status).toBe('ACTIVE');
     expect(sub2!.startDate).toBe(now);
-    expect(sub2!.endDate).toEqual(dateTransformMock.addMonths(now, 1));
+    expect(sub2!.endDate).toEqual(dateTransformServiceMock.addMonths(now, 1));
 
     expect(spies.subscriptionRepository.listAllActive).toHaveBeenCalled();
   });

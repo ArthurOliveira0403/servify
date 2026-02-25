@@ -9,7 +9,7 @@ import { UpdateServiceUseCase } from 'src/application/use-cases/update-service.u
 import { Service } from 'src/domain/entities/service';
 import { ServiceRespository } from 'src/domain/repositories/service.repository';
 import { InMemoryServiceRepository } from 'test/utils/in-memory/in-memory.service-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('UpdateServiceUseCase', () => {
   let useCase: UpdateServiceUseCase;
@@ -43,7 +43,7 @@ describe('UpdateServiceUseCase', () => {
     jest.clearAllMocks();
 
     repository = new InMemoryServiceRepository();
-    dateTransformService = dateTransformMock;
+    dateTransformService = dateTransformServiceMock;
     useCase = new UpdateServiceUseCase(repository, dateTransformService);
     spies = {
       serviceRepository: {

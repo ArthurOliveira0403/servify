@@ -6,11 +6,13 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify';
 export async function singUpAndLogin(
   app: NestFastifyApplication,
   data: SignUpBodyDTO,
-): Promise<string> {
+): Promise<{ accessToken: string }> {
   await request(app.getHttpServer()).post('/auth/signup').send(data);
   const response = await request(app.getHttpServer())
     .post('/auth/signin')
     .send({ email: data.email, password: data.password });
 
-  return response.body.accessToken as string;
+  const accessToken = response.body.accessToken as string;
+
+  return { accessToken };
 }

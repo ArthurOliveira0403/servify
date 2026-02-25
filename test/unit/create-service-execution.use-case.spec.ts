@@ -13,7 +13,7 @@ import { ServiceRespository } from 'src/domain/repositories/service.repository';
 import { InMemoryClientCompanyRepository } from 'test/utils/in-memory/in-memory.client-company.repository';
 import { InMemoryServiceExecutionRespository } from 'test/utils/in-memory/in-memory.service-execution-repository';
 import { InMemoryServiceRepository } from 'test/utils/in-memory/in-memory.service-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 import { SubscriptionPolicyServiceMock } from 'test/utils/mocks/subscription-policy-service.mock';
 
 describe('CreateServiceExecutionUseCase', () => {
@@ -54,7 +54,7 @@ describe('CreateServiceExecutionUseCase', () => {
     serviceExecutionRepository = new InMemoryServiceExecutionRespository();
     serviceRepository = new InMemoryServiceRepository();
     clientCompanyRepository = new InMemoryClientCompanyRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     const subscriptionPolicyService = SubscriptionPolicyServiceMock;
 
     useCase = new CreateServiceExecutionUseCase(

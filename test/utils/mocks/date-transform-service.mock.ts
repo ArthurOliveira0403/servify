@@ -1,6 +1,6 @@
 import { DateTransformService } from 'src/application/services/date-transform.service';
 
-export const dateTransformMock: DateTransformService = {
+export const dateTransformServiceMock: DateTransformService = {
   nowUTC: jest.fn().mockReturnValue(new Date()),
   addMonths: jest.fn().mockImplementation((date: Date, months: number) => {
     return new Date(new Date(date).setMonth(date.getMonth() + months));
@@ -11,6 +11,11 @@ export const dateTransformMock: DateTransformService = {
   formatInTimezone: jest.fn().mockReturnValue(new Date().toISOString()),
   formatInTimezoneWithoutHour: jest
     .fn()
+    .mockImplementation((date: Date) => {
+      const cloned = new Date(date);
+      cloned.setUTCHours(0, 0, 0, 0);
+      return cloned.toISOString();
+    })
     .mockReturnValue(new Date().toISOString()),
   toTimezone: jest.fn().mockReturnValue(new Date()),
   toUTC: jest.fn().mockReturnValue(new Date()),

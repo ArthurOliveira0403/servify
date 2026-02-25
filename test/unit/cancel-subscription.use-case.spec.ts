@@ -7,7 +7,7 @@ import { Subscription } from 'src/domain/entities/subscription';
 import { SubscriptionException } from 'src/domain/exceptions/subscription.exception';
 import { SubscriptionRepository } from 'src/domain/repositories/subscription.repository';
 import { InMemorySubscriptionRepository } from 'test/utils/in-memory/in-memory.subscription-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('CancelSubscriptionUseCase', () => {
   let useCase: CancelSubscriptionUseCase;
@@ -39,7 +39,7 @@ describe('CancelSubscriptionUseCase', () => {
 
   beforeEach(async () => {
     subscriptionRepository = new InMemorySubscriptionRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     useCase = new CancelSubscriptionUseCase(
       subscriptionRepository,
       dateTransformService,

@@ -7,9 +7,9 @@ import { PlanRepository } from 'src/domain/repositories/plan.repository';
 import { SubscriptionRepository } from 'src/domain/repositories/subscription.repository';
 import { InMemoryPlanRepository } from 'test/utils/in-memory/in-memory.plan-repository';
 import { InMemorySubscriptionRepository } from 'test/utils/in-memory/in-memory.subscription-repository';
-import { dateTransformMock } from 'test/utils/mocks/date-transform.mock';
 import { AlreadyExistException } from 'src/application/exceptions/already-exist.exception';
 import { EntityNotFoundException } from 'src/application/exceptions/entity-not-found.exception';
+import { dateTransformServiceMock } from 'test/utils/mocks/date-transform-service.mock';
 
 describe('CreateSubscriptionUseCase', () => {
   let useCase: CreateSusbcriptionUseCase;
@@ -59,7 +59,7 @@ describe('CreateSubscriptionUseCase', () => {
   beforeEach(async () => {
     subscriptionRepository = new InMemorySubscriptionRepository();
     planRepository = new InMemoryPlanRepository();
-    const dateTransformService = dateTransformMock;
+    const dateTransformService = dateTransformServiceMock;
     useCase = new CreateSusbcriptionUseCase(
       subscriptionRepository,
       planRepository,
@@ -118,9 +118,11 @@ describe('CreateSubscriptionUseCase', () => {
     expect(subscription.invoicesLimit).toBe(monthlyPlan.invoicesLimit);
     expect(subscription.status).toBe('ACTIVE');
     expect(subscription.startDate).toBe(now);
-    expect(subscription.endDate).toEqual(dateTransformMock.addMonths(now, 1));
+    expect(subscription.endDate).toEqual(
+      dateTransformServiceMock.addMonths(now, 1),
+    );
     expect(subscription.renewalDate).toEqual(
-      dateTransformMock.addMonths(now, 1),
+      dateTransformServiceMock.addMonths(now, 1),
     );
     expect(subscription.autoRenew).toBe(true);
   });
@@ -155,9 +157,11 @@ describe('CreateSubscriptionUseCase', () => {
     expect(subscription.invoicesLimit).toBe(yearlyPlan.invoicesLimit);
     expect(subscription.status).toBe('ACTIVE');
     expect(subscription.startDate).toBe(now);
-    expect(subscription.endDate).toEqual(dateTransformMock.addYears(now, 1));
+    expect(subscription.endDate).toEqual(
+      dateTransformServiceMock.addYears(now, 1),
+    );
     expect(subscription.renewalDate).toEqual(
-      dateTransformMock.addYears(now, 1),
+      dateTransformServiceMock.addYears(now, 1),
     );
     expect(subscription.autoRenew).toBe(true);
   });

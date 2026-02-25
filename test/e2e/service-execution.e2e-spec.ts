@@ -87,7 +87,8 @@ describe('ServiceExecution (e2e)', () => {
       phone: '12345678',
     };
 
-    token = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
+    token = accessToken;
     const { serviceId } = await serviceSeed(prisma, serviceData);
     const { clientCompanyId } = await clientCompanySeed(
       prisma,
@@ -193,12 +194,12 @@ describe('ServiceExecution (e2e)', () => {
   });
 
   it('/service-execution (POST) - should return 403 when the "User" companyId does not match with Service and ClientCompanyId', async () => {
-    const otherTokenCompany = await singUpAndLogin(app, otherCompanyData);
-    await createSubscriptionHelper(app, prisma, otherTokenCompany, planData);
+    const { accessToken } = await singUpAndLogin(app, otherCompanyData);
+    await createSubscriptionHelper(app, prisma, accessToken, planData);
 
     await request(app.getHttpServer())
       .post('/service-execution')
-      .set('Authorization', `Bearer ${otherTokenCompany}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(dataToCreate)
       .expect(403);
   });
@@ -230,7 +231,7 @@ describe('ServiceExecution (e2e)', () => {
   });
 
   it('/service-execution (POST) - should return 403 when the have not an active subscripion', async () => {
-    const otherTokenCompany = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'Lumin',
       email: `${randomUUID()}@email.com`,
       cnpj: `${randomUUID()}`,
@@ -239,7 +240,7 @@ describe('ServiceExecution (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/service-execution')
-      .set('Authorization', `Bearer ${otherTokenCompany}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(dataToCreate)
       .expect(403);
   });

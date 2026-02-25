@@ -69,7 +69,8 @@ describe('Service (e2e)', () => {
       password: '123245678',
     };
 
-    token = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
+    token = accessToken;
 
     planData = {
       name: `name_${randomUUID().slice(0, 25)}`, // No ZodSchema para criar, o limitede caracteres para o nome é 30
@@ -136,7 +137,7 @@ describe('Service (e2e)', () => {
 
   // Corrigir após FilterException
   it('/service (POST) - should return 403 when the company have not subscription', async () => {
-    const otherCompanyToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -145,7 +146,7 @@ describe('Service (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/service')
-      .set('Authorization', `Bearer ${otherCompanyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(serviceData)
       .expect(403);
   });
@@ -179,7 +180,7 @@ describe('Service (e2e)', () => {
   });
 
   it('/service (GET) - should return 403 when the company have not subscription', async () => {
-    const otherCompanyToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'otherCompany',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -188,7 +189,7 @@ describe('Service (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/service')
-      .set('Authorization', `Bearer ${otherCompanyToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
@@ -233,18 +234,18 @@ describe('Service (e2e)', () => {
 
     const serviceId = createResponse.body.serviceId;
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'Lumi',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
       password: '1234',
     });
 
-    await createSubscriptionHelper(app, prisma, otherToken, planData);
+    await createSubscriptionHelper(app, prisma, accessToken, planData);
 
     await request(app.getHttpServer())
       .patch(`/service/${serviceId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(updateData)
       .expect(403);
   });
@@ -252,7 +253,7 @@ describe('Service (e2e)', () => {
   it('/service/:id (PATCH) - should return 403 when the company have not an active subscription', async () => {
     const simuledServiceId = '1234567';
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'Lumi',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -261,7 +262,7 @@ describe('Service (e2e)', () => {
 
     await request(app.getHttpServer())
       .patch(`/service/${simuledServiceId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(updateData)
       .expect(403);
   });
@@ -304,7 +305,7 @@ describe('Service (e2e)', () => {
 
     const serviceId = createResponse.body.serviceId;
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'Lumi',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -313,14 +314,14 @@ describe('Service (e2e)', () => {
 
     await request(app.getHttpServer())
       .delete(`/service/${serviceId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
 
   it('/service/:id (DELETE) - should return 403 when the company have not subscription', async () => {
     const simuledServiceId = '234567';
 
-    const otherToken = await singUpAndLogin(app, {
+    const { accessToken } = await singUpAndLogin(app, {
       name: 'Lumi',
       cnpj: `${randomUUID()}`,
       email: `${randomUUID()}@email.com`,
@@ -329,7 +330,7 @@ describe('Service (e2e)', () => {
 
     await request(app.getHttpServer())
       .delete(`/service/${simuledServiceId}`)
-      .set('Authorization', `Bearer ${otherToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(updateData)
       .expect(403);
   });

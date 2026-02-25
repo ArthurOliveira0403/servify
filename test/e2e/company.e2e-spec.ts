@@ -61,12 +61,12 @@ describe('Company (e2e)', () => {
   });
 
   it('/company (PATCH) - should update a company', async () => {
-    const token = await singUpAndLogin(app, companyData);
+    const { accessToken } = await singUpAndLogin(app, companyData);
 
     const response = await request(app.getHttpServer())
       .patch('/company')
       .send(data)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .set('Timezone', 'America/Brasilia')
       .expect(200);
 
